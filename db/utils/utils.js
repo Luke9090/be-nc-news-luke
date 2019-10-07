@@ -1,4 +1,6 @@
-exports.formatDates = list => {
+const _ = {};
+
+_.formatDates = list => {
   return list.map(obj => {
     const newObj = { ...obj };
     if (newObj.created_at) newObj.created_at = new Date(newObj.created_at);
@@ -6,7 +8,7 @@ exports.formatDates = list => {
   });
 };
 
-exports.makeRefObj = (list, key = 'title', value = 'article_id') => {
+_.makeRefObj = (list, key = 'title', value = 'article_id') => {
   return list.map(obj => {
     const newObj = {};
     newObj[obj[key]] = obj[value];
@@ -14,8 +16,14 @@ exports.makeRefObj = (list, key = 'title', value = 'article_id') => {
   });
 };
 
-exports.formatComments = (comments, articleRef) => {
-  return comments.map(comment => {
-    return { ...comment };
+_.formatComments = (comments, articleRef) => {
+  return _.formatDates(comments).map(comment => {
+    comment.author = comment.created_by;
+    delete comment.created_by;
+    comment.article_id = articleRef[comment.belongs_to];
+    delete comment.belongs_to;
+    return comment;
   });
 };
+
+module.exports = _;

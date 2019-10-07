@@ -191,12 +191,12 @@ describe.only('formatComments', () => {
     expect(input).to.eql(control);
     expect(refObj).to.eql(refObjControl);
   });
-  it('objects in returned array have a created_by property equal to the author properties from the passed array and do not have an author key', () => {
+  it('objects in returned array have an author property equal to the created_by properties from the passed array and do not have a created_by key', () => {
     const result = formatComments(input, refObj);
     result.forEach((obj, i) => {
-      expect(obj).to.contain.key('created_at');
-      expect(obj.created_at).to.equal(input[i].author);
-      expect(obj).to.not.contain.key('author');
+      expect(obj).to.contain.key('author');
+      expect(obj.author).to.equal(input[i].created_by);
+      expect(obj).to.not.contain.key('created_by');
     });
   });
   it('objects in returned array have an article_id property equal to the relevant value from the passed reference object and do not have a belongs_to key', () => {
