@@ -69,7 +69,7 @@ describe('formatDates', () => {
       }
     ];
     const expected = new Date(1471522072389);
-    expect(formatDates(input)[0].created_at).to.equal(expected);
+    expect(formatDates(input)[0].created_at).to.eql(expected);
   });
   it('all objects returned in array have a created_at value which has been converted to a JS date', () => {
     const input = [
@@ -85,9 +85,9 @@ describe('formatDates', () => {
       }
     ];
     const expected1 = new Date(1471522072389);
-    expect(formatDates(input)[0].created_at).to.equal(expected1);
+    expect(formatDates(input)[0].created_at).to.eql(expected1);
     const expected2 = new Date(1500584273256);
-    expect(formatDates(input)[1].created_at).to.equal(expected2);
+    expect(formatDates(input)[1].created_at).to.eql(expected2);
   });
 });
 

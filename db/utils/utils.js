@@ -1,8 +1,9 @@
 exports.formatDates = list => {
-  const newList = list.map(obj => {
-    return { ...obj };
+  return list.map(obj => {
+    const newObj = { ...obj };
+    if (newObj.created_at) newObj.created_at = new Date(newObj.created_at);
+    return newObj;
   });
-  return newList;
 };
 
 exports.makeRefObj = list => {};
