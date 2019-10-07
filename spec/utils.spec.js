@@ -111,7 +111,7 @@ describe('formatDates', () => {
   });
 });
 
-describe.only('makeRefObj', () => {
+describe('makeRefObj', () => {
   it('returns a new array without mutating the original array or the objects within it', () => {
     const input = [{ article_id: 1, title: 'A' }];
     const control = [{ article_id: 1, title: 'A' }];
