@@ -14,4 +14,8 @@ exports.makeRefObj = (list, key = 'title', value = 'article_id') => {
   });
 };
 
-exports.formatComments = (comments, articleRef) => {};
+exports.formatComments = (comments, articleRef) => {
+  return comments.map(comment => {
+    return { ...comment };
+  });
+};
