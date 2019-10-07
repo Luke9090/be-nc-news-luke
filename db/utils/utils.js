@@ -9,11 +9,11 @@ _.formatDates = list => {
 };
 
 _.makeRefObj = (list, key = 'title', value = 'article_id') => {
-  return list.map(obj => {
-    const newObj = {};
+  const newObj = {};
+  list.forEach(obj => {
     newObj[obj[key]] = obj[value];
-    return newObj;
   });
+  return newObj;
 };
 
 _.formatComments = (comments, articleRef) => {
