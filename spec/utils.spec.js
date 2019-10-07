@@ -148,4 +148,79 @@ describe('makeRefObj', () => {
   });
 });
 
-describe('formatComments', () => {});
+describe.only('formatComments', () => {
+  const input = [
+    {
+      body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+      belongs_to: "They're not exactly dogs, are they?",
+      created_by: 'butter_bridge',
+      votes: 16,
+      created_at: 1511354163389
+    },
+    {
+      body: 'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.',
+      belongs_to: 'Living in the shadow of a great man',
+      created_by: 'butter_bridge',
+      votes: 14,
+      created_at: 1479818163389
+    },
+    {
+      body:
+        'Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works.',
+      belongs_to: 'Living in the shadow of a great man',
+      created_by: 'icellusedkars',
+      votes: 100,
+      created_at: 1448282163389
+    }
+  ];
+  const control = input.map(obj => {
+    return { ...obj };
+  });
+  const refObj = {
+    "They're not exactly dogs, are they?": 1,
+    'Living in the shadow of a great man': 2
+  };
+  const refObjControl = {
+    "They're not exactly dogs, are they?": 1,
+    'Living in the shadow of a great man': 2
+  };
+  it('returns a new array and does not mutate the passed array or any of the objects inside it', () => {
+    expect(formatComments(input, refObj)).to.be.an('array');
+    expect(formatComments(input, refObj)).to.not.equal(input);
+    expect(formatComments(input, refObj)[1]).to.not.equal(input[1]);
+    expect(input).to.eql(control);
+    expect(refObj).to.eql(refObjControl);
+  });
+  it('objects in returned array have a created_by property equal to the author properties from the passed array and do not have an author key', () => {
+    const result = formatComments(input, refObj);
+    result.forEach((obj, i) => {
+      expect(obj).to.contain.key('created_at');
+      expect(obj.created_at).to.equal(input[i].author);
+      expect(obj).to.not.contain.key('author');
+    });
+  });
+  it('objects in returned array have an article_id property equal to the relevant value from the passed reference object and do not have a belongs_to key', () => {
+    const result = formatComments(input, refObj);
+    result.forEach((obj, i) => {
+      expect(obj).to.contain.key('article_id');
+      expect(obj.article_id).to.equal(refObj[input[i].belongs_to]);
+      expect(obj).to.not.contain.key('belongs_to');
+    });
+  });
+  it('created_at property of objects in returned array is a javascript date object', () => {
+    const result = formatComments(input, refObj);
+    result.forEach((obj, i) => {
+      expect(obj).to.contain.key('created_at');
+      expect(obj.created_at instanceof Date).to.be.true;
+      expect(obj.created_at).to.eql(new Date(input[i].created_at));
+    });
+  });
+  it('all other properties of objects in returned array are equal to those in the passed array', () => {
+    const result = formatComments(input, refObj);
+    result.forEach((obj, i) => {
+      expect(obj).to.contain.keys('body', 'votes');
+      expect(obj.body).to.equal(input[i].body);
+      expect(obj.votes).to.equal(input[i].votes);
+    });
+  });
+});
