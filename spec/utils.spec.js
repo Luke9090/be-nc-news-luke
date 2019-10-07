@@ -112,39 +112,39 @@ describe('formatDates', () => {
 });
 
 describe('makeRefObj', () => {
-  it('returns a new array without mutating the original array or the objects within it', () => {
+  it('returns an object without mutating the original array or the objects within it', () => {
     const input = [{ article_id: 1, title: 'A' }];
     const control = [{ article_id: 1, title: 'A' }];
-    expect(makeRefObj(input)).to.be.an('array');
+    expect(makeRefObj(input)).to.be.an('object');
     expect(makeRefObj(input)).to.not.equal(input);
     expect(control).to.eql(input);
   });
-  it('first object in returned array has a key equal to the title property of the first object in the passed array', () => {
+  it('returned object has a key equal to the title property of the first object in the passed array', () => {
     const input = [{ article_id: 1, title: 'A' }];
-    expect(makeRefObj(input)[0]).to.contain.key('A');
+    expect(makeRefObj(input)).to.contain.key('A');
   });
-  it('title property of the first object in the returned array is equal to the article_id property of the first object in the passed array', () => {
+  it('title property of the returned object is equal to the article_id property of the first object in the passed array', () => {
     const input = [{ article_id: 1, title: 'A' }];
-    expect(makeRefObj(input)[0].A).to.equal(1);
+    expect(makeRefObj(input).A).to.equal(1);
   });
-  it('first object in returned array has no other keys', () => {
+  it('returned object has no other keys when passed a single-item array', () => {
     const input = [{ article_id: 1, title: 'A' }];
-    expect(makeRefObj(input)[0]).to.have.key('A');
+    expect(makeRefObj(input)).to.have.key('A');
   });
   it('acts on all objects in array', () => {
     const input = [{ article_id: 1, title: 'A' }, { article_id: 5, title: 'Z' }, { article_id: 10, title: 'M' }];
-    expect(makeRefObj(input)[1]).to.have.key('Z');
-    expect(makeRefObj(input)[2]).to.have.key('M');
-    expect(makeRefObj(input)[1].Z).to.equal(5);
-    expect(makeRefObj(input)[2].M).to.equal(10);
+    expect(makeRefObj(input)).to.contain.key('Z');
+    expect(makeRefObj(input)).to.contain.key('M');
+    expect(makeRefObj(input).Z).to.equal(5);
+    expect(makeRefObj(input).M).to.equal(10);
   });
   it('accepts a second parameter (string) which instructs it to choose a different property as the key for the reference object', () => {
     const input = [{ article_id: 1, title: 'A', subtitle: 'B' }];
-    expect(makeRefObj(input, 'subtitle')[0]).to.have.key('B');
+    expect(makeRefObj(input, 'subtitle')).to.have.key('B');
   });
   it('accepts a third parameter (string) which instructs it to choose a different property as the value for the reference object', () => {
     const input = [{ article_id: 1, title: 'A', subtitle: 'B' }];
-    expect(makeRefObj(input, 'subtitle', 'title')[0].B).to.equal('A');
+    expect(makeRefObj(input, 'subtitle', 'title').B).to.equal('A');
   });
 });
 
