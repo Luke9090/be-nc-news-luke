@@ -14,7 +14,6 @@ describe('formatDates', () => {
     expect(formatDates(input)).to.not.equal(input);
   });
   it('does not mutate objects within the array', () => {
-    const input = [obj1, obj2];
     const obj1 = {
       title: 'Running a Node App',
       topic: 'coding',
@@ -25,6 +24,7 @@ describe('formatDates', () => {
       topic: 'coding',
       author: 'jessjelly'
     };
+    const input = [obj1, obj2];
     expect(formatDates(input)[0]).to.not.equal(obj1);
     expect(formatDates(input)[1]).to.not.equal(obj2);
   });
