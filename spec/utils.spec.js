@@ -148,7 +148,7 @@ describe('makeRefObj', () => {
   });
 });
 
-describe.only('formatComments', () => {
+describe('formatComments', () => {
   const input = [
     {
       body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
