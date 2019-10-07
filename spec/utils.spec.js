@@ -131,6 +131,21 @@ describe.only('makeRefObj', () => {
     const input = [{ article_id: 1, title: 'A' }];
     expect(makeRefObj(input)[0]).to.have.key('A');
   });
+  it('acts on all objects in array', () => {
+    const input = [{ article_id: 1, title: 'A' }, { article_id: 5, title: 'Z' }, { article_id: 10, title: 'M' }];
+    expect(makeRefObj(input)[1]).to.have.key('Z');
+    expect(makeRefObj(input)[2]).to.have.key('M');
+    expect(makeRefObj(input)[1].Z).to.equal(5);
+    expect(makeRefObj(input)[2].M).to.equal(10);
+  });
+  it('accepts a second parameter (string) which instructs it to choose a different property as the key for the reference object', () => {
+    const input = [{ article_id: 1, title: 'A', subtitle: 'B' }];
+    expect(makeRefObj(input, 'subtitle')[0]).to.have.key('B');
+  });
+  it('accepts a third parameter (string) which instructs it to choose a different property as the value for the reference object', () => {
+    const input = [{ article_id: 1, title: 'A', subtitle: 'B' }];
+    expect(makeRefObj(input, 'subtitle', 'title')[0].B).to.equal('A');
+  });
 });
 
 describe('formatComments', () => {});
