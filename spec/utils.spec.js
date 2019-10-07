@@ -111,6 +111,26 @@ describe('formatDates', () => {
   });
 });
 
-describe('makeRefObj', () => {});
+describe('makeRefObj', () => {
+  it('returns a new array without mutating the original array or the objects within it', () => {
+    const input = [{ article_id: 1, title: 'A' }];
+    const control = [{ article_id: 1, title: 'A' }];
+    expect(makeRefObj(input)).to.be.an('array');
+    expect(makeRefObj(input)).to.not.equal(input);
+    expect(control).to.eql(input);
+  });
+  it('first object in returned array has a key equal to the title property of the first object in the passed array', () => {
+    const input = [{ article_id: 1, title: 'A' }];
+    expect(makeRefObj(input)[0]).to.contain.key('A');
+  });
+  it('title property of the first object in the returned array is equal to the article_id property of the first object in the passed array', () => {
+    const input = [{ article_id: 1, title: 'A' }];
+    expect(makeRefObj(input)[0].A).to.equal(1);
+  });
+  it('first object in returned array has no other keys', () => {
+    const input = [{ article_id: 1, title: 'A' }];
+    expect(makeRefObj(input)[0]).to.have.key('A');
+  });
+});
 
 describe('formatComments', () => {});
