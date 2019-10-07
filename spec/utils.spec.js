@@ -10,8 +10,16 @@ describe('formatDates', () => {
         author: 'jessjelly'
       }
     ];
+    const control = [
+      {
+        title: 'Running a Node App',
+        topic: 'coding',
+        author: 'jessjelly'
+      }
+    ];
     expect(formatDates(input)).to.be.an('array');
     expect(formatDates(input)).to.not.equal(input);
+    expect(control).to.eql(input);
   });
   it('does not mutate objects within the array', () => {
     const obj1 = {
@@ -24,9 +32,21 @@ describe('formatDates', () => {
       topic: 'coding',
       author: 'jessjelly'
     };
+    const control1 = {
+      title: 'Running a Node App',
+      topic: 'coding',
+      author: 'jessjelly'
+    };
+    const control2 = {
+      title: "The Rise Of Thinking Machines: How IBM's Watson Takes On The World",
+      topic: 'coding',
+      author: 'jessjelly'
+    };
     const input = [obj1, obj2];
+    const control = [control1, control2];
     expect(formatDates(input)[0]).to.not.equal(obj1);
     expect(formatDates(input)[1]).to.not.equal(obj2);
+    expect(input).to.eql(control);
   });
   it('objects returned in array have all properties other than "created_at" equal to their original value', () => {
     const input = [
