@@ -18,9 +18,9 @@ exports.seed = function(knex) {
 
       return Promise.all([topicsInsertions, usersInsertions]);
     })
-    .then(([topicsInsertions, usersInsertions]) => {
-      console.log(topicsInsertions.rows);
-      console.log(usersInsertions.rows);
+    .then(([topics, users]) => {
+      console.log(topics);
+      console.log(users);
       /* 
         
         Your article data is currently in the incorrect format and will violate your SQL schema. 
