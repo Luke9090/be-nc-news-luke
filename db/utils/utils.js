@@ -6,6 +6,12 @@ exports.formatDates = list => {
   });
 };
 
-exports.makeRefObj = list => {};
+exports.makeRefObj = (list, key = 'title', value = 'article_id') => {
+  return list.map(obj => {
+    const newObj = {};
+    newObj[obj[key]] = obj[value];
+    return newObj;
+  });
+};
 
 exports.formatComments = (comments, articleRef) => {};
