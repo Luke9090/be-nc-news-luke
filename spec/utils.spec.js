@@ -13,6 +13,21 @@ describe('formatDates', () => {
     expect(formatDates(input)).to.be.an('array');
     expect(formatDates(input)).to.not.equal(input);
   });
+  it('does not mutate objects within the array', () => {
+    const input = [obj1, obj2];
+    const obj1 = {
+      title: 'Running a Node App',
+      topic: 'coding',
+      author: 'jessjelly'
+    };
+    const obj2 = {
+      title: "The Rise Of Thinking Machines: How IBM's Watson Takes On The World",
+      topic: 'coding',
+      author: 'jessjelly'
+    };
+    expect(formatDates(input)[0]).to.not.equal(obj1);
+    expect(formatDates(input)[1]).to.not.equal(obj2);
+  });
   it('objects returned in array have all properties other than "created_at" equal to their original value', () => {
     const input = [
       {
