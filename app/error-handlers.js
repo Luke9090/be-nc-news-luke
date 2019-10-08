@@ -1,10 +1,10 @@
 exports.send404 = (req, res, next) => {
-  next({ status: 404, msg: 'Error: File or path not found' });
+  next({ status: 404, msg: 'File or path not found' });
 };
 
 exports.msgWithStatus = (err, req, res, next) => {
   if (err.status && err.msg) {
-    res.status(err.status).send(err.msg);
+    res.status(err.status).send({ err: err.msg });
   } else next(err);
 };
 
