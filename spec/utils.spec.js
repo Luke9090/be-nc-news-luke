@@ -149,41 +149,44 @@ describe('makeRefObj', () => {
 });
 
 describe('formatComments', () => {
-  const input = [
-    {
-      body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
-      belongs_to: "They're not exactly dogs, are they?",
-      created_by: 'butter_bridge',
-      votes: 16,
-      created_at: 1511354163389
-    },
-    {
-      body: 'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.',
-      belongs_to: 'Living in the shadow of a great man',
-      created_by: 'butter_bridge',
-      votes: 14,
-      created_at: 1479818163389
-    },
-    {
-      body:
-        'Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works.',
-      belongs_to: 'Living in the shadow of a great man',
-      created_by: 'icellusedkars',
-      votes: 100,
-      created_at: 1448282163389
-    }
-  ];
-  const control = input.map(obj => {
-    return { ...obj };
+  let input, control, refObj, refObjControl;
+  beforeEach(() => {
+    input = [
+      {
+        body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        belongs_to: "They're not exactly dogs, are they?",
+        created_by: 'butter_bridge',
+        votes: 16,
+        created_at: 1511354163389
+      },
+      {
+        body: 'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.',
+        belongs_to: 'Living in the shadow of a great man',
+        created_by: 'butter_bridge',
+        votes: 14,
+        created_at: 1479818163389
+      },
+      {
+        body:
+          'Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works.',
+        belongs_to: 'Living in the shadow of a great man',
+        created_by: 'icellusedkars',
+        votes: 100,
+        created_at: 1448282163389
+      }
+    ];
+    control = input.map(obj => {
+      return { ...obj };
+    });
+    refObj = {
+      "They're not exactly dogs, are they?": 1,
+      'Living in the shadow of a great man': 2
+    };
+    refObjControl = {
+      "They're not exactly dogs, are they?": 1,
+      'Living in the shadow of a great man': 2
+    };
   });
-  const refObj = {
-    "They're not exactly dogs, are they?": 1,
-    'Living in the shadow of a great man': 2
-  };
-  const refObjControl = {
-    "They're not exactly dogs, are they?": 1,
-    'Living in the shadow of a great man': 2
-  };
   it('returns a new array and does not mutate the passed array or any of the objects inside it', () => {
     expect(formatComments(input, refObj)).to.be.an('array');
     expect(formatComments(input, refObj)).to.not.equal(input);
