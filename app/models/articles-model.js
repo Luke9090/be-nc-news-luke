@@ -36,20 +36,32 @@ exports.updateArticlesById = (articleId, body) => {
 };
 
 exports.insertCommentOnArticle = (articleId, comment) => {
-  return utils.checkId(articleId).then(() => {
-    if (
-      Object.keys(comment)
-        .sort()
-        .join(',') !== 'body,username'
-    )
-      return Promise.reject({ status: 400, msg: 'Missing or superfluous keys. The JSON object you send must have keys for body and username with no others' });
-    if (typeof comment.username !== 'string' || comment.username.length === 0)
-      return Promise.reject({ status: 400, msg: 'Invalid username. Username must be a string.' });
-    if (typeof comment.body !== 'string' || comment.body.length === 0)
-      return Promise.reject({ status: 400, msg: 'Invalid comment body. Comment body must be a string of non-zero length.' });
+  return utils
+    .checkId(articleId)
+    .then(() => {
+      if (
+        Object.keys(comment)
+          .sort()
+          .join(',') !== 'body,username'
+      )
+        return Promise.reject({
+          status: 400,
+          msg: 'Missing or superfluous keys. The JSON object you send must have keys for body, username and no others'
+        });
+      if (typeof comment.username !== 'string' || comment.username.length === 0)
+        return Promise.reject({ status: 400, msg: 'Invalid username. Username must be a string.' });
+      if (typeof comment.body !== 'string' || comment.body.length === 0)
+        return Promise.reject({ status: 400, msg: 'Invalid comment body. Comment body must be a string of non-zero length.' });
 
-    return knex('comments').insert(utils.renameKeys(comment, ['username', 'author']));
-  });
+      comment.article_id = articleId;
+      return knex('comments')
+        .insert(utils.renameKeys(comment, ['username', 'author']))
+        .returning('*');
+    })
+    .then(([postedComment]) => {
+      console.log({ postedComment });
+      return { postedComment };
+    });
 };
 
 exports.selectCommentsByArticle = () => {};

@@ -171,13 +171,17 @@ describe('/', () => {
               .expect(200)
               .then(({ body }) => {
                 expect(body).to.have.key('postedComment');
-                expect(body.postedComment).to.have.keys('username', 'body', 'comment_id');
+                expect(body.postedComment).to.have.keys('author', 'body', 'comment_id', 'created_at', 'votes', 'article_id');
                 const expected = {
-                  username: 'rogersop',
+                  author: 'rogersop',
                   body: 'FIRST, loooool',
-                  comment_id: testData.commentData.length + 1
+                  comment_id: testData.commentData.length + 1,
+                  votes: 0,
+                  article_id: 2
                 };
-                expect(body.postedComment).to.eql(expected);
+                Object.keys(expected).forEach(key => {
+                  expect(body.postedComment[key]).to.equal(expected[key]);
+                });
                 return request(app)
                   .post('/api/articles/2/comments')
                   .send({ username: 'icellusedkars', body: 'SECOND, loooool' })
@@ -185,13 +189,19 @@ describe('/', () => {
               })
               .then(({ body }) => {
                 expect(body).to.have.key('postedComment');
-                expect(body.postedComment).to.have.keys('username', 'body', 'comment_id');
+                expect(body.postedComment).to.have.keys('author', 'body', 'comment_id', 'created_at', 'votes', 'article_id');
+                console.log(body);
                 const expected = {
-                  username: 'icellusedkars',
+                  author: 'icellusedkars',
                   body: 'SECOND, loooool',
-                  comment_id: testData.commentData.length + 2
+                  comment_id: testData.commentData.length + 2,
+                  votes: 0,
+                  article_id: 2
                 };
-                expect(body.postedComment).to.eql(expected);
+                Object.keys(expected).forEach(key => {
+                  expect(body.postedComment[key]).to.equal(expected[key]);
+                });
+                return;
               });
           });
           describe('/comments error states', () => {
