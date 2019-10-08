@@ -61,6 +61,15 @@ describe('/', () => {
             expect(body.user).to.eql(expected);
           });
       });
+      it('GET /:invalid_username - responds 404 with an object containing an error message under the key "err"', () => {
+        return request(app)
+          .get('/api/users/non-existent-user')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).to.have.key('err');
+            expect(body.err).to.eql('Could not find a user with the username "non-existent-user"');
+          });
+      });
     });
   });
 });
