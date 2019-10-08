@@ -25,5 +25,9 @@ exports.postCommentOnArticle = (req, res, next) => {
 };
 
 exports.getCommentsByArticle = (req, res, next) => {
-  console.log('getComments controller');
+  selectCommentsByArticle(req.params.article_id, req.query)
+    .then(comments => {
+      res.status(200).send(comments);
+    })
+    .catch(next);
 };

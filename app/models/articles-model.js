@@ -59,9 +59,19 @@ exports.insertCommentOnArticle = (articleId, comment) => {
         .returning('*');
     })
     .then(([postedComment]) => {
-      console.log({ postedComment });
       return { postedComment };
     });
 };
 
-exports.selectCommentsByArticle = () => {};
+exports.selectCommentsByArticle = (articleId, query) => {
+  return selectArticlesById(articleId)
+    .then(() => {
+      return knex('comments')
+        .select('*')
+        .where('article_id', articleId);
+      // Add sort_by and order queries
+    })
+    .then(comments => {
+      return { comments };
+    });
+};

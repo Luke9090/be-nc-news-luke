@@ -190,7 +190,6 @@ describe('/', () => {
               .then(({ body }) => {
                 expect(body).to.have.key('postedComment');
                 expect(body.postedComment).to.have.keys('author', 'body', 'comment_id', 'created_at', 'votes', 'article_id');
-                console.log(body);
                 const expected = {
                   author: 'icellusedkars',
                   body: 'SECOND, loooool',
@@ -203,11 +202,14 @@ describe('/', () => {
                 });
                 return;
               });
+            // it GETS with default sort
+            // it accepts sort_by and order queries
           });
           describe('/comments error states', () => {
             // non-existent username
             // no username
             // no body
+            // bad queries
             it('PATCH /:article_id - responds 400 with error message if sent invalid JSON', () => {
               return request(app)
                 .patch('/api/articles/1/comments')
@@ -218,7 +220,7 @@ describe('/', () => {
                   expect(body.err).to.equal('Error parsing JSON. Make sure you are sending valid JSON data');
                 });
             });
-            it('GET or PATCH - /:invalid_article_id/comments - responds 400 with an object containing an error message under the key "err"', () => {
+            it('GET or POST - /:invalid_article_id/comments - responds 400 with an object containing an error message under the key "err"', () => {
               const getReq = request(app)
                 .get('/api/articles/invalid-article-id/comments')
                 .expect(400)
@@ -227,7 +229,7 @@ describe('/', () => {
                   expect(body.err).to.eql('"invalid-article-id" is not a valid article ID. Expected a number.');
                 });
               const patchReq = request(app)
-                .patch('/api/articles/invalid-article-id/comments')
+                .post('/api/articles/invalid-article-id/comments')
                 .send({ username: 'rogersop', body: 'some comment' })
                 .expect(400)
                 .then(({ body }) => {
@@ -236,7 +238,7 @@ describe('/', () => {
                 });
               return Promise.all([getReq, patchReq]);
             });
-            it('GET or PATCH - /:non-existent_article_id - responds 404 with an object containing an error message under the key "err"', () => {
+            it('GET or POST - /:non-existent_article_id - responds 404 with an object containing an error message under the key "err"', () => {
               const getReq = request(app)
                 .get('/api/articles/9999/comments')
                 .expect(404)
@@ -245,7 +247,7 @@ describe('/', () => {
                   expect(body.err).to.eql('Could not find an article with the article ID "9999".');
                 });
               const patchReq = request(app)
-                .patch('/api/articles/9999/comments')
+                .post('/api/articles/9999/comments')
                 .send({ username: 'rogersop', body: 'some comment' })
                 .expect(404)
                 .then(({ body }) => {
