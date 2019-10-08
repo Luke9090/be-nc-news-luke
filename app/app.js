@@ -7,8 +7,8 @@ app.use('/api', apiRouter);
 
 app.all('/*', errHandlers.send404);
 
-app.use(errHandlers.msgWithStatus);
 app.use(errHandlers.sqlError);
+app.use(errHandlers.msgWithStatus);
 app.use(errHandlers.otherError);
 
 module.exports = app;

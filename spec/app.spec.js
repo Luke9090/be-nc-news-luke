@@ -80,16 +80,16 @@ describe('/', () => {
           .expect(200)
           .then(({ body }) => {
             expect(body).to.have.key('article');
-            expect(body.article).to.have.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
+            // expect(body.article).to.have.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
             const expected = {
               author: testData.articleData[0].author,
               title: testData.articleData[0].title,
               article_id: 1,
               body: testData.articleData[0].body,
               topic: testData.articleData[0].topic,
-              created_at: '2018-11-15 12:21:54.171+00',
+              created_at: '2018-11-15T12:21:54.171Z',
               votes: 100,
-              comment_count: 13
+              comment_count: '13'
             };
             expect(body.article).to.eql(expected);
           });
