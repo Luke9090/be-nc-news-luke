@@ -74,91 +74,178 @@ describe('/', () => {
       });
     });
     describe('/articles', () => {
-      it('GET /:article_id - responds 200 with an object containing an article object under the key "article"', () => {
-        return request(app)
-          .get('/api/articles/1')
-          .expect(200)
-          .then(({ body }) => {
-            expect(body).to.have.key('article');
-            expect(body.article).to.have.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
-            const expected = {
-              author: testData.articleData[0].author,
-              title: testData.articleData[0].title,
-              article_id: 1,
-              body: testData.articleData[0].body,
-              topic: testData.articleData[0].topic,
-              created_at: '2018-11-15T12:21:54.171Z',
-              votes: testData.articleData[0].votes,
-              comment_count: '13'
-            };
-            expect(body.article).to.eql(expected);
+      describe('/:article_id', () => {
+        it('GET /:article_id - responds 200 with an object containing an article object under the key "article"', () => {
+          return request(app)
+            .get('/api/articles/1')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body).to.have.key('article');
+              expect(body.article).to.have.keys('author', 'title', 'article_id', 'body', 'topic', 'created_at', 'votes', 'comment_count');
+              const expected = {
+                author: testData.articleData[0].author,
+                title: testData.articleData[0].title,
+                article_id: 1,
+                body: testData.articleData[0].body,
+                topic: testData.articleData[0].topic,
+                created_at: '2018-11-15T12:21:54.171Z',
+                votes: testData.articleData[0].votes,
+                comment_count: '13'
+              };
+              expect(body.article).to.eql(expected);
+            });
+        });
+        it('PATCH /:article_id - responds 200 with an object containing an article object under the key "updatedArticle"', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes: 3 })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body).to.have.key('updatedArticle');
+              expect(body.updatedArticle).to.have.keys('article_id', 'title', 'body', 'votes', 'topic', 'author', 'created_at');
+              const expected = {
+                article_id: 1,
+                title: testData.articleData[0].title,
+                body: testData.articleData[0].body,
+                votes: testData.articleData[0].votes + 3,
+                topic: testData.articleData[0].topic,
+                author: testData.articleData[0].author,
+                created_at: '2018-11-15T12:21:54.171Z'
+              };
+              expect(body.updatedArticle).to.eql(expected);
+            });
+        });
+        describe('/:article_id error states', () => {
+          it('PATCH /:article_id - responds 400 with error message if sent invalid JSON', () => {
+            return request(app)
+              .patch('/api/articles/1')
+              .send("{ 'inc_count': 3 }")
+              .type('json')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal('Error parsing JSON. Make sure you are sending valid JSON data');
+              });
           });
-      });
-      it('PATCH /:article_id - responds 200 with an object containing an article object under the key "updatedArticle"', () => {
-        return request(app)
-          .patch('/api/articles/1')
-          .send({ inc_votes: 3 })
-          .expect(200)
-          .then(({ body }) => {
-            expect(body).to.have.key('updatedArticle');
-            expect(body.updatedArticle).to.have.keys('article_id', 'title', 'body', 'votes', 'topic', 'author', 'created_at');
-            const expected = {
-              article_id: 1,
-              title: testData.articleData[0].title,
-              body: testData.articleData[0].body,
-              votes: testData.articleData[0].votes + 3,
-              topic: testData.articleData[0].topic,
-              author: testData.articleData[0].author,
-              created_at: '2018-11-15T12:21:54.171Z'
-            };
-            expect(body.updatedArticle).to.eql(expected);
+          it('GET or PATCH - /:invalid_article_id - responds 400 with an object containing an error message under the key "err"', () => {
+            const getReq = request(app)
+              .get('/api/articles/invalid-article-id')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body).to.have.key('err');
+                expect(body.err).to.eql('"invalid-article-id" is not a valid article ID. Expected a number.');
+              });
+            const patchReq = request(app)
+              .patch('/api/articles/invalid-article-id')
+              .send({ inc_votes: 3 })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body).to.have.key('err');
+                expect(body.err).to.eql('"invalid-article-id" is not a valid article ID. Expected a number.');
+              });
+            return Promise.all([getReq, patchReq]);
           });
-      });
-      it('PATCH /:article_id - responds 400 with error message if sent invalid JSON', () => {
-        return request(app)
-          .patch('/api/articles/1')
-          .send("{ 'inc_count': 3 }")
-          .type('json')
-          .expect(400)
-          .then(({ body }) => {
-            expect(body.err).to.equal('Error parsing JSON. Make sure you are sending valid JSON data');
+          it('GET or PATCH - /:non-existent_article_id - responds 404 with an object containing an error message under the key "err"', () => {
+            const getReq = request(app)
+              .get('/api/articles/9999')
+              .expect(404)
+              .then(({ body }) => {
+                expect(body).to.have.key('err');
+                expect(body.err).to.eql('Could not find an article with the article ID "9999".');
+              });
+            const patchReq = request(app)
+              .patch('/api/articles/9999')
+              .send({ inc_votes: 3 })
+              .expect(404)
+              .then(({ body }) => {
+                expect(body).to.have.key('err');
+                expect(body.err).to.eql('Could not find an article with the article ID "9999".');
+              });
+            return Promise.all([getReq, patchReq]);
           });
-      });
-      it('GET or PATCH - /:invalid_article_id - responds 400 with an object containing an error message under the key "err"', () => {
-        const getReq = request(app)
-          .get('/api/articles/invalid-article-id')
-          .expect(400)
-          .then(({ body }) => {
-            expect(body).to.have.key('err');
-            expect(body.err).to.eql('"invalid-article-id" is not a valid article ID. Expected a number.');
+        });
+        describe('/comments', () => {
+          it('POST / - responds 200 with an object containing a comment object under the key postedComment', () => {
+            return request(app)
+              .post('/api/articles/2/comments')
+              .send({ username: 'rogersop', body: 'FIRST, loooool' })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body).to.have.key('postedComment');
+                expect(body.postedComment).to.have.keys('username', 'body', 'comment_id');
+                const expected = {
+                  username: 'rogersop',
+                  body: 'FIRST, loooool',
+                  comment_id: testData.commentData.length + 1
+                };
+                expect(body.postedComment).to.eql(expected);
+                return request(app)
+                  .post('/api/articles/2/comments')
+                  .send({ username: 'icellusedkars', body: 'SECOND, loooool' })
+                  .expect(200);
+              })
+              .then(({ body }) => {
+                expect(body).to.have.key('postedComment');
+                expect(body.postedComment).to.have.keys('username', 'body', 'comment_id');
+                const expected = {
+                  username: 'icellusedkars',
+                  body: 'SECOND, loooool',
+                  comment_id: testData.commentData.length + 2
+                };
+                expect(body.postedComment).to.eql(expected);
+              });
           });
-        const patchReq = request(app)
-          .patch('/api/articles/invalid-article-id')
-          .send({ inc_votes: 3 })
-          .expect(400)
-          .then(({ body }) => {
-            expect(body).to.have.key('err');
-            expect(body.err).to.eql('"invalid-article-id" is not a valid article ID. Expected a number.');
+          describe('/comments error states', () => {
+            // non-existent username
+            // no username
+            // no body
+            it('PATCH /:article_id - responds 400 with error message if sent invalid JSON', () => {
+              return request(app)
+                .patch('/api/articles/1/comments')
+                .send("{ 'inc_count': 3 }")
+                .type('json')
+                .expect(400)
+                .then(({ body }) => {
+                  expect(body.err).to.equal('Error parsing JSON. Make sure you are sending valid JSON data');
+                });
+            });
+            it('GET or PATCH - /:invalid_article_id/comments - responds 400 with an object containing an error message under the key "err"', () => {
+              const getReq = request(app)
+                .get('/api/articles/invalid-article-id/comments')
+                .expect(400)
+                .then(({ body }) => {
+                  expect(body).to.have.key('err');
+                  expect(body.err).to.eql('"invalid-article-id" is not a valid article ID. Expected a number.');
+                });
+              const patchReq = request(app)
+                .patch('/api/articles/invalid-article-id/comments')
+                .send({ username: 'rogersop', body: 'some comment' })
+                .expect(400)
+                .then(({ body }) => {
+                  expect(body).to.have.key('err');
+                  expect(body.err).to.eql('"invalid-article-id" is not a valid article ID. Expected a number.');
+                });
+              return Promise.all([getReq, patchReq]);
+            });
+            it('GET or PATCH - /:non-existent_article_id - responds 404 with an object containing an error message under the key "err"', () => {
+              const getReq = request(app)
+                .get('/api/articles/9999/comments')
+                .expect(404)
+                .then(({ body }) => {
+                  expect(body).to.have.key('err');
+                  expect(body.err).to.eql('Could not find an article with the article ID "9999".');
+                });
+              const patchReq = request(app)
+                .patch('/api/articles/9999/comments')
+                .send({ username: 'rogersop', body: 'some comment' })
+                .expect(404)
+                .then(({ body }) => {
+                  expect(body).to.have.key('err');
+                  expect(body.err).to.eql('Could not find an article with the article ID "9999".');
+                });
+              return Promise.all([getReq, patchReq]);
+            });
           });
-        return Promise.all([getReq, patchReq]);
-      });
-      it('GET or PATCH - /:non-existent_article_id - responds 404 with an object containing an error message under the key "err"', () => {
-        const getReq = request(app)
-          .get('/api/articles/9999')
-          .expect(404)
-          .then(({ body }) => {
-            expect(body).to.have.key('err');
-            expect(body.err).to.eql('Could not find an article with the article ID "9999".');
-          });
-        const patchReq = request(app)
-          .patch('/api/articles/9999')
-          .send({ inc_votes: 3 })
-          .expect(404)
-          .then(({ body }) => {
-            expect(body).to.have.key('err');
-            expect(body.err).to.eql('Could not find an article with the article ID "9999".');
-          });
-        return Promise.all([getReq, patchReq]);
+        });
       });
     });
   });
