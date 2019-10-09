@@ -541,5 +541,52 @@ describe('/', () => {
         });
       });
     });
+    describe('/comments', () => {
+      describe('/:comment_id', () => {
+        it('PATCH / responds with 200 and an object containing a comment with updated vote value', () => {
+          return request(app)
+            .patch('/api/comments/5')
+            .send({ inc_votes: 10 })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body).to.have.key('updatedComment');
+              const expected = {
+                comment_id: 5,
+                author: 'icellusedkars',
+                article_id: 1,
+                votes: 10,
+                created_at: '2013-11-23T12:36:03.389Z',
+                body: 'I hate streaming noses'
+              };
+              expect(body.updatedComment).to.eql(expected);
+            })
+            .then(() => {
+              return request(app)
+                .patch('/api/comments/5')
+                .send({ inc_votes: -15 })
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body).to.have.key('updatedComment');
+                  const expected = {
+                    comment_id: 5,
+                    author: 'icellusedkars',
+                    article_id: 1,
+                    votes: -5,
+                    created_at: '2013-11-23T12:36:03.389Z',
+                    body: 'I hate streaming noses'
+                  };
+                  expect(body.updatedComment).to.eql(expected);
+                });
+            });
+        });
+        describe('/:comment_id error states', () => {
+          // DELETE or PATCH non-existent comment_id
+          // DELETE or PATCH invalid comment_id
+          // JSON with bad syntax
+          // JSON with bad keys
+          // JSON with bad values
+        });
+      });
+    });
   });
 });
