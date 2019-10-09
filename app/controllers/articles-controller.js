@@ -1,4 +1,4 @@
-const { selectArticlesById, updateArticlesById, insertCommentOnArticle, selectCommentsByArticle } = require('../models/articles-model');
+const { selectArticlesById, updateArticlesById, insertCommentOnArticle, selectCommentsByArticle, selectArticles } = require('../models/articles-model');
 
 exports.getArticlesById = (req, res, next) => {
   selectArticlesById(req.params.article_id)
@@ -28,6 +28,14 @@ exports.getCommentsByArticle = (req, res, next) => {
   selectCommentsByArticle(req.params.article_id, req.query)
     .then(comments => {
       res.status(200).send(comments);
+    })
+    .catch(next);
+};
+
+exports.getArticles = (req, res, next) => {
+  selectArticles(req.query)
+    .then(articles => {
+      res.status(200).send(articles);
     })
     .catch(next);
 };

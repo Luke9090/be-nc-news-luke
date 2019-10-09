@@ -76,6 +76,139 @@ describe('/', () => {
       });
     });
     describe('/articles', () => {
+      it('GET / - responds 200 with an array of article objects under the key articles', () => {
+        return request(app)
+          .get('/api/articles')
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.be.an('object');
+            expect(body).to.contain.key('articles');
+            expect(body.articles).to.be.an('array');
+            body.articles.forEach(article => {
+              expect(article).to.be.an('object');
+            });
+          });
+      });
+      it('GET / - responds 200 and each article object has correct keys', () => {
+        return request(app)
+          .get('/api/articles')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            articles.forEach(article => {
+              expect(article).to.have.keys('author', 'title', 'article_id', 'topic', 'created_at', 'votes', 'comment_count');
+            });
+          });
+      });
+      it('GET / - responds 200 and default sorts article array descending by created_at', () => {
+        return request(app)
+          .get('/api/articles')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).to.be.descendingBy('created_at');
+          });
+      });
+      it('GET / - responds 200 and adds an article_count property to the object', () => {
+        return request(app)
+          .get('/api/articles')
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.contain.key('article_count');
+            expect(body.articles.length).to.equal(body.article_count);
+          });
+      });
+      it('GET / - responds 200 and sorts article array descending by column under sort_by key in query', () => {
+        return request(app)
+          .get('/api/articles?sort_by=votes')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).to.be.descendingBy('votes');
+          });
+      });
+      it('GET / - responds 200 and sorts article array in the order specified by order key in query', () => {
+        const votesAsc = request(app)
+          .get('/api/articles?sort_by=votes&order=asc')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).to.be.ascendingBy('votes');
+          });
+        const commentsDesc = request(app)
+          .get('/api/articles?sort_by=comment_count&order=desc')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            for (let i = 1; i < articles.length; i++) {
+              expect(Number(articles[i].comment_count)).to.be.at.most(Number(articles[i - 1].comment_count));
+            }
+          });
+        return Promise.all([votesAsc, commentsDesc]);
+      });
+      it('GET / - responds 200 and filters article array by author or topic properties in the query', () => {
+        const author = request(app)
+          .get('/api/articles?author=icellusedkars')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).to.equal(6);
+            articles.forEach(article => {
+              expect(article.author).to.equal('icellusedkars');
+            });
+          });
+        const topic = request(app)
+          .get('/api/articles?topic=cats')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).to.equal(1);
+            articles.forEach(article => {
+              expect(article.topic).to.equal('cats');
+            });
+          });
+        return Promise.all([author, topic]);
+      });
+      it('GET / - responds 200 and correctly handles multiple queries', () => {
+        return request(app)
+          .get('/api/articles?author=rogersop&topic=mitch&sort_by=body')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).to.equal(2);
+            expect(articles[0].title.startsWith('Seven')).to.be.true;
+          });
+      });
+      describe('/articles error states', () => {
+        // Bad query keys
+        it('GET ?badkey=something - responds with 400 and error message', () => {
+          return request(app)
+            .get('/api/articles?badkey=something')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.err).to.equal('Bad request. Query can only include the following keys: sort_by, order, author, topic');
+            });
+        });
+        // Bad sort query values
+        it('GET ?sort_by=non-existent-column - responds with 400 and error message', () => {
+          return request(app)
+            .get('/api/articles?sort_by=non-existent-column')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.err).to.equal('Bad request. Bad column name.');
+            });
+        });
+        it('GET ?sort_by=nearly-existent-column-typo - responds with 400 and error message with hint', () => {
+          return request(app)
+            .get('/api/articles?sort_by=authr')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.err).to.equal("Bad request. Perhaps you meant 'author'");
+            });
+        });
+        // Bad filter query values
+        it('GET ?filter=non-existent-value - responds with 200 and an object with article_count of 0 and an empty articles array', () => {
+          return request(app)
+            .get('/api/articles?author=non-existent-author')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles.length).to.equal(0);
+              expect(body.article_count).to.equal(0);
+            });
+        });
+      });
       describe('/:article_id', () => {
         it('GET /:article_id - responds 200 with an object containing an article object under the key "article"', () => {
           return request(app)
@@ -241,6 +374,9 @@ describe('/', () => {
               .get('/api/articles/1/comments?sort_by=body')
               .expect(200)
               .then(({ body: { comments } }) => {
+                // Alex troubleshooting
+                // console.log(comments);
+                // expect(comments).to.be.descendingBy('body');
                 for (let i = 1; i < comments.length; i++) {
                   const body1 = comments[i - 1].body.toLowerCase();
                   const body2 = comments[i].body.toLowerCase();
@@ -359,7 +495,7 @@ describe('/', () => {
                   .get('/api/articles/1/comments?badKey=anything')
                   .expect(400)
                   .then(({ body }) => {
-                    expect(body.err).to.equal("Bad Request. Query keys must be 'order' and/or 'sort_by'");
+                    expect(body.err).to.equal('Bad request. Query can only include the following keys: sort_by, order');
                   });
               });
             });

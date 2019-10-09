@@ -64,18 +64,43 @@ exports.insertCommentOnArticle = (articleId, comment) => {
 
 exports.selectCommentsByArticle = (articleId, query) => {
   const { sort_by = 'created_at', order = 'desc' } = query;
-  if (query.sort_by) delete query.sort_by;
-  if (query.order) delete query.order;
-  if (Object.keys(query).length > 0) return Promise.reject({ status: 400, msg: "Bad Request. Query keys must be 'order' and/or 'sort_by'" });
   if (order !== 'desc' && order !== 'asc') return Promise.reject({ status: 400, msg: "Bad Request. Order must be either 'asc' or 'desc'" });
-  return selectArticlesById(articleId)
+  // if (query.sort_by) delete query.sort_by;
+  // if (query.order) delete query.order;
+  // if (Object.keys(query).length > 0) return Promise.reject({ status: 400, msg: "Bad Request. Query keys must be 'order' and/or 'sort_by'" });
+  return utils
+    .checkQueryKeys(query, ['sort_by', 'order'])
     .then(() => {
-      return knex('comments')
-        .select('comment_id', 'votes', 'created_at', 'author', 'body')
-        .where('article_id', articleId)
-        .orderBy(sort_by, order);
+      return selectArticlesById(articleId).then(() => {
+        return knex('comments')
+          .select('comment_id', 'votes', 'created_at', 'author', 'body')
+          .where('article_id', articleId)
+          .orderBy(sort_by, order);
+      });
     })
     .then(comments => {
       return { article_id: articleId, comment_count: comments.length, comments };
+    });
+};
+
+exports.selectArticles = query => {
+  return utils
+    .checkQueryKeys(query, ['sort_by', 'order', 'author', 'topic'])
+    .then(() => {
+      let { sort_by = 'created_at', order = 'desc', author, topic } = query;
+      sort_by = sort_by === 'comment_count' ? sort_by : 'articles.' + sort_by;
+      return knex('articles')
+        .select('articles.author', 'articles.title', 'articles.article_id', 'articles.topic', 'articles.created_at', 'articles.votes')
+        .count('comments.comment_id AS comment_count')
+        .leftJoin('comments', 'articles.article_id', 'comments.article_id')
+        .groupBy('articles.article_id')
+        .orderBy(sort_by, order)
+        .modify(knexQuery => {
+          if (author) knexQuery.where('articles.author', '=', author);
+          if (topic) knexQuery.where('articles.topic', '=', topic);
+        });
+    })
+    .then(articles => {
+      return { article_count: articles.length, articles };
     });
 };

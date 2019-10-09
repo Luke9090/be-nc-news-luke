@@ -14,4 +14,10 @@ utils.checkId = id => {
   else return Promise.resolve();
 };
 
+utils.checkQueryKeys = (query, validKeys) => {
+  const validity = Object.keys(query).every(key => validKeys.includes(key));
+  if (validity) return Promise.resolve();
+  else return Promise.reject({ status: 400, msg: `Bad request. Query can only include the following keys: ${validKeys.join(', ')}` });
+};
+
 module.exports = utils;
