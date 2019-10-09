@@ -36,8 +36,7 @@ exports.updateArticlesById = (articleId, body) => {
 };
 
 exports.insertCommentOnArticle = (articleId, comment) => {
-  return utils
-    .checkId(articleId)
+  return selectArticlesById(articleId)
     .then(() => {
       if (
         Object.keys(comment)
@@ -64,14 +63,19 @@ exports.insertCommentOnArticle = (articleId, comment) => {
 };
 
 exports.selectCommentsByArticle = (articleId, query) => {
+  const { sort_by = 'created_at', order = 'desc' } = query;
+  if (query.sort_by) delete query.sort_by;
+  if (query.order) delete query.order;
+  if (Object.keys(query).length > 0) return Promise.reject({ status: 400, msg: "Bad Request. Query keys must be 'order' and/or 'sort_by'" });
+  if (order !== 'desc' && order !== 'asc') return Promise.reject({ status: 400, msg: "Bad Request. Order must be either 'asc' or 'desc'" });
   return selectArticlesById(articleId)
     .then(() => {
       return knex('comments')
-        .select('*')
-        .where('article_id', articleId);
-      // Add sort_by and order queries
+        .select('comment_id', 'votes', 'created_at', 'author', 'body')
+        .where('article_id', articleId)
+        .orderBy(sort_by, order);
     })
     .then(comments => {
-      return { comments };
+      return { article_id: articleId, comment_count: comments.length, comments };
     });
 };
