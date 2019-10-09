@@ -580,11 +580,52 @@ describe('/', () => {
             });
         });
         describe('/:comment_id error states', () => {
-          // DELETE or PATCH non-existent comment_id
-          // DELETE or PATCH invalid comment_id
-          // JSON with bad syntax
-          // JSON with bad keys
-          // JSON with bad values
+          it('PATCH /:non-existent_comment_id - Responds 400 with error', () => {
+            return request(app)
+            .patch('/api/comments/9999')
+            .send({ inc_votes: 10 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.err).to.equal('Bad request. Could not find a comment with comment_id of "9999"');
+            })
+          });
+          it('PATCH /:invalid_comment_id - Responds 400 with error', () => {
+            return request(app)
+            .patch('/api/comments/ghfjhgf')
+            .send({ inc_votes: 10 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.err).to.equal('Bad request. "ghfjhgf" is not a valid comment_id. Must be a number.');
+            })
+          });
+          it('PATCH / - responds 400 with error message if sent invalid JSON', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send("{ 'inc_votes': 3 }")
+              .type('json')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal('Error parsing JSON. Make sure you are sending valid JSON data');
+              });
+          });
+          it('PATCH / - responds 400 with error message if sent invalid keys in JSON', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send({ inc_vote: 3 })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal(`Bad request. JSON passed in request can only include the following keys: inc_votes`);
+              });
+          });
+          it('PATCH / - responds 400 with error message if sent invalid inc_votes value in JSON', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send({ inc_votes: 'banana' })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal('Bad request. The value of inc_votes must be a number.');
+              });
+          });
         });
       });
     });

@@ -9,7 +9,7 @@ exports.sqlError = (err, req, res, next) => {
       break;
     case '22P02':
       console.log(err);
-      next({ status: 400, msg: 'Invalid input. Database expected a different type of variable.' });
+      next({ status: 400, msg: 'Bad request. Database expected a different type of variable.' });
       break;
     case '23503':
       const errDetailRegex = /Key \(author\)=\(([\s\S]+)\) is not present in table "users"/;

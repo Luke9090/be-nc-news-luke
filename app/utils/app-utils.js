@@ -20,4 +20,10 @@ utils.checkQueryKeys = (query, validKeys) => {
   else return Promise.reject({ status: 400, msg: `Bad request. Query can only include the following keys: ${validKeys.join(', ')}` });
 };
 
+utils.checkJsonKeys = (query, validKeys) => {
+  const validity = Object.keys(query).every(key => validKeys.includes(key));
+  if (validity) return Promise.resolve();
+  else return Promise.reject({ status: 400, msg: `Bad request. JSON passed in request can only include the following keys: ${validKeys.join(', ')}` });
+};
+
 module.exports = utils;
