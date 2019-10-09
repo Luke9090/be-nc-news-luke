@@ -6,9 +6,9 @@ const selectArticlesById = articleId => {
     .checkId(articleId)
     .then(() => {
       return knex('articles')
-        .select('articles.author', 'title', 'articles.article_id', 'articles.body', 'topic', 'articles.created_at', 'articles.votes')
-        .join('comments', 'comments.article_id', 'articles.article_id')
-        .count('articles.article_id as comment_count')
+        .select('articles.*')
+        .leftJoin('comments', 'comments.article_id', 'articles.article_id')
+        .count('comments.comment_id as comment_count')
         .where('articles.article_id', articleId)
         .groupBy('articles.article_id');
     })
