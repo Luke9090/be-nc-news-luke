@@ -16,6 +16,5 @@ apiRouter
   .route('/')
   .get(getApiJson)
   .all(errHandlers.send405);
-apiRouter.all('/*', errHandlers.send404);
 
 module.exports = apiRouter;
