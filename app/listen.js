@@ -1,3 +1,5 @@
-require('./app').listen(9090, () => {
-  console.log('listening on 9090');
+const { PORT = 9090 } = process.env;
+
+require('./app').listen(PORT, () => {
+  console.log(`listening on ${PORT}`);
 });
