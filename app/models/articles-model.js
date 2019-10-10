@@ -20,9 +20,14 @@ const selectArticlesById = articleId => {
 exports.selectArticlesById = selectArticlesById;
 
 exports.updateArticlesById = (articleId, body) => {
-  if (typeof body.inc_votes !== 'number')
-    return Promise.reject({ status: 400, msg: `Passed JSON object is not valid. Expected a key of 'inc_votes' with a number value.` });
-  return selectArticlesById(articleId)
+  return utils
+    .checkJsonKeys(body, ['inc_votes'])
+    .then(() => {
+      return utils.checkIncVotes(body.inc_votes);
+    })
+    .then(() => {
+      return selectArticlesById(articleId);
+    })
     .then(({ article }) => {
       const newVotes = article.votes + body.inc_votes;
       return knex('articles')

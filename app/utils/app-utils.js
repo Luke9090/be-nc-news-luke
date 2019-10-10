@@ -26,4 +26,9 @@ utils.checkJsonKeys = (query, validKeys) => {
   else return Promise.reject({ status: 400, msg: `Bad request. JSON passed in request can only include the following keys: ${validKeys.join(', ')}` });
 };
 
+utils.checkIncVotes = inc_votes => {
+  if (isNaN(inc_votes)) return Promise.reject({ status: 400, msg: `Bad request. The value of inc_votes must be a number.` });
+  return Promise.resolve();
+};
+
 module.exports = utils;

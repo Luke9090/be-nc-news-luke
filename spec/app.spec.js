@@ -261,6 +261,34 @@ describe('/', () => {
                 expect(body.err).to.equal('Error parsing JSON. Make sure you are sending valid JSON data');
               });
           });
+          it('PATCH / - responds 400 with error message if sent invalid JSON', () => {
+            return request(app)
+              .patch('/api/articles/1')
+              .send("{ 'inc_votes': 3 }")
+              .type('json')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal('Error parsing JSON. Make sure you are sending valid JSON data');
+              });
+          });
+          it('PATCH / - responds 400 with error message if sent invalid keys in JSON', () => {
+            return request(app)
+              .patch('/api/articles/1')
+              .send({ inc_vote: 3 })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal(`Bad request. JSON passed in request can only include the following keys: inc_votes`);
+              });
+          });
+          it('PATCH / - responds 400 with error message if sent invalid inc_votes value in JSON', () => {
+            return request(app)
+              .patch('/api/articles/1')
+              .send({ inc_votes: 'banana' })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal('Bad request. The value of inc_votes must be a number.');
+              });
+          });
           it('GET or PATCH - /:invalid_article_id - responds 400 with an object containing an error message under the key "err"', () => {
             const getReq = request(app)
               .get('/api/articles/invalid-article-id')
@@ -582,21 +610,21 @@ describe('/', () => {
         describe('/:comment_id error states', () => {
           it('PATCH /:non-existent_comment_id - Responds 400 with error', () => {
             return request(app)
-            .patch('/api/comments/9999')
-            .send({ inc_votes: 10 })
-            .expect(400)
-            .then(({ body }) => {
-              expect(body.err).to.equal('Bad request. Could not find a comment with comment_id of "9999"');
-            })
+              .patch('/api/comments/9999')
+              .send({ inc_votes: 10 })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal('Bad request. Could not find a comment with comment_id of "9999"');
+              });
           });
           it('PATCH /:invalid_comment_id - Responds 400 with error', () => {
             return request(app)
-            .patch('/api/comments/ghfjhgf')
-            .send({ inc_votes: 10 })
-            .expect(400)
-            .then(({ body }) => {
-              expect(body.err).to.equal('Bad request. "ghfjhgf" is not a valid comment_id. Must be a number.');
-            })
+              .patch('/api/comments/ghfjhgf')
+              .send({ inc_votes: 10 })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal('Bad request. "ghfjhgf" is not a valid comment_id. Must be a number.');
+              });
           });
           it('PATCH / - responds 400 with error message if sent invalid JSON', () => {
             return request(app)
