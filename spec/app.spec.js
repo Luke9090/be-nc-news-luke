@@ -44,7 +44,7 @@ describe('/', () => {
       .patch('/api/users/rogersob')
       .expect(405);
     const req3 = request(app)
-      .patch('/api/articles')
+      .delete('/api')
       .expect(405);
     return Promise.all([req1, req2, req3]);
   });
@@ -192,7 +192,6 @@ describe('/', () => {
           });
       });
       describe('/articles error states', () => {
-        // Bad query keys
         it('GET ?badkey=something - responds with 400 and error message', () => {
           return request(app)
             .get('/api/articles?badkey=something')
@@ -201,7 +200,6 @@ describe('/', () => {
               expect(body.err).to.equal('Bad request. Query can only include the following keys: sort_by, order, author, topic');
             });
         });
-        // Bad sort query values
         it('GET ?sort_by=non-existent-column - responds with 400 and error message', () => {
           return request(app)
             .get('/api/articles?sort_by=non-existent-column')
@@ -218,7 +216,6 @@ describe('/', () => {
               expect(body.err).to.equal("Bad request. Perhaps you meant 'author'");
             });
         });
-        // Bad filter query values
         it('GET ?filter=non-existent-value - responds with 200 and an object with article_count of 0 and an empty articles array', () => {
           return request(app)
             .get('/api/articles?author=non-existent-author')
@@ -250,14 +247,14 @@ describe('/', () => {
               expect(body.article).to.eql(expected);
             });
         });
-        it('PATCH /:article_id - responds 200 with an object containing an article object under the key "updatedArticle"', () => {
+        it('PATCH /:article_id - responds 200 with an object containing an article object under the key "article"', () => {
           return request(app)
             .patch('/api/articles/1')
             .send({ inc_votes: 3 })
             .expect(200)
             .then(({ body }) => {
-              expect(body).to.have.key('updatedArticle');
-              expect(body.updatedArticle).to.have.keys('article_id', 'title', 'body', 'votes', 'topic', 'author', 'created_at');
+              expect(body).to.have.key('article');
+              expect(body.article).to.have.keys('article_id', 'title', 'body', 'votes', 'topic', 'author', 'created_at');
               const expected = {
                 article_id: 1,
                 title: testData.articleData[0].title,
@@ -267,7 +264,7 @@ describe('/', () => {
                 author: testData.articleData[0].author,
                 created_at: '2018-11-15T12:21:54.171Z'
               };
-              expect(body.updatedArticle).to.eql(expected);
+              expect(body.article).to.eql(expected);
             });
         });
         describe('/:article_id error states', () => {
@@ -347,14 +344,14 @@ describe('/', () => {
           });
         });
         describe('/comments', () => {
-          it('POST / - responds 201 with an object containing a comment object under the key postedComment', () => {
+          it('POST / - responds 201 with an object containing a comment object under the key comment', () => {
             return request(app)
               .post('/api/articles/2/comments')
               .send({ username: 'rogersop', body: 'FIRST, loooool' })
               .expect(201)
               .then(({ body }) => {
-                expect(body).to.have.key('postedComment');
-                expect(body.postedComment).to.have.keys('author', 'body', 'comment_id', 'created_at', 'votes', 'article_id');
+                expect(body).to.have.key('comment');
+                expect(body.comment).to.have.keys('author', 'body', 'comment_id', 'created_at', 'votes', 'article_id');
                 const expected = {
                   author: 'rogersop',
                   body: 'FIRST, loooool',
@@ -363,7 +360,7 @@ describe('/', () => {
                   article_id: 2
                 };
                 Object.keys(expected).forEach(key => {
-                  expect(body.postedComment[key]).to.equal(expected[key]);
+                  expect(body.comment[key]).to.equal(expected[key]);
                 });
                 return request(app)
                   .post('/api/articles/2/comments')
@@ -371,8 +368,8 @@ describe('/', () => {
                   .expect(201);
               })
               .then(({ body }) => {
-                expect(body).to.have.key('postedComment');
-                expect(body.postedComment).to.have.keys('author', 'body', 'comment_id', 'created_at', 'votes', 'article_id');
+                expect(body).to.have.key('comment');
+                expect(body.comment).to.have.keys('author', 'body', 'comment_id', 'created_at', 'votes', 'article_id');
                 const expected = {
                   author: 'icellusedkars',
                   body: 'SECOND, loooool',
@@ -381,7 +378,7 @@ describe('/', () => {
                   article_id: 2
                 };
                 Object.keys(expected).forEach(key => {
-                  expect(body.postedComment[key]).to.equal(expected[key]);
+                  expect(body.comment[key]).to.equal(expected[key]);
                 });
                 return;
               });
@@ -597,7 +594,7 @@ describe('/', () => {
             .send({ inc_votes: 10 })
             .expect(200)
             .then(({ body }) => {
-              expect(body).to.have.key('updatedComment');
+              expect(body).to.have.key('comment');
               const expected = {
                 comment_id: 5,
                 author: 'icellusedkars',
@@ -606,7 +603,7 @@ describe('/', () => {
                 created_at: '2013-11-23T12:36:03.389Z',
                 body: 'I hate streaming noses'
               };
-              expect(body.updatedComment).to.eql(expected);
+              expect(body.comment).to.eql(expected);
             })
             .then(() => {
               return request(app)
@@ -614,7 +611,7 @@ describe('/', () => {
                 .send({ inc_votes: -15 })
                 .expect(200)
                 .then(({ body }) => {
-                  expect(body).to.have.key('updatedComment');
+                  expect(body).to.have.key('comment');
                   const expected = {
                     comment_id: 5,
                     author: 'icellusedkars',
@@ -623,7 +620,7 @@ describe('/', () => {
                     created_at: '2013-11-23T12:36:03.389Z',
                     body: 'I hate streaming noses'
                   };
-                  expect(body.updatedComment).to.eql(expected);
+                  expect(body.comment).to.eql(expected);
                 });
             });
         });

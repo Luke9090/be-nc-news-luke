@@ -36,7 +36,7 @@ exports.updateArticlesById = (articleId, body) => {
         .returning('*');
     })
     .then(articleArr => {
-      return { updatedArticle: articleArr[0] };
+      return { article: articleArr[0] };
     });
 };
 
@@ -62,8 +62,8 @@ exports.insertCommentOnArticle = (articleId, comment) => {
         .insert(utils.renameKeys(comment, ['username', 'author']))
         .returning('*');
     })
-    .then(([postedComment]) => {
-      return { postedComment };
+    .then(([comment]) => {
+      return { comment };
     });
 };
 

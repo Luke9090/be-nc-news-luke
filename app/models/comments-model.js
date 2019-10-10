@@ -28,8 +28,8 @@ exports.updateCommentVotes = (commentId, patchObj) => {
         .update('votes', newVotes)
         .returning('*');
     })
-    .then(([updatedComment]) => {
-      return { updatedComment };
+    .then(([comment]) => {
+      return { comment };
     });
 };
 

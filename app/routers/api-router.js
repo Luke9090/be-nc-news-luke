@@ -12,7 +12,10 @@ apiRouter.use('/topics', topicsRouter);
 apiRouter.use('/users', usersRouter);
 apiRouter.use('/articles', articlesRouter);
 apiRouter.use('/comments', commentsRouter);
-apiRouter.get('/', getApiJson);
+apiRouter
+  .route('/')
+  .get(getApiJson)
+  .all(errHandlers.send405);
 apiRouter.all('/*', errHandlers.send404);
 
 module.exports = apiRouter;

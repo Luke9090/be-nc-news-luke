@@ -41,7 +41,7 @@
     "queries": [],
     "receives": { "inc_votes": 3 },
     "exampleResponse": {
-      "updatedArticle": {
+      "article": {
         "article_id": 2,
         "title": "The Rise Of Thinking Machines: How IBM's Watson Takes On The World",
         "body": "Text of article",
@@ -60,7 +60,7 @@
       "body": "Text of comment"
     },
     "exampleResponse": {
-      "postedComment": {
+      "comment": {
         "comment_id": 301,
         "author": "tickle122",
         "article_id": 2,
@@ -113,7 +113,7 @@
       "inc_votes": 3
     },
     "exampleResponse": {
-      "updatedComment": {
+      "comment": {
         "comment_id": 2,
         "author": "grumpy19",
         "article_id": 4,
