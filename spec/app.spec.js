@@ -216,13 +216,12 @@ describe('/', () => {
               expect(body.err).to.equal("Bad request. Perhaps you meant 'author'");
             });
         });
-        it('GET ?filter=non-existent-value - responds with 200 and an object with article_count of 0 and an empty articles array', () => {
+        it('GET ?filter=non-existent-value - responds with 404 and an error message', () => {
           return request(app)
             .get('/api/articles?author=non-existent-author')
-            .expect(200)
+            .expect(404)
             .then(({ body }) => {
-              expect(body.articles.length).to.equal(0);
-              expect(body.article_count).to.equal(0);
+              expect(body.err).to.equal('Author or Topic from query not found.');
             });
         });
       });

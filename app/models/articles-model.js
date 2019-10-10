@@ -91,18 +91,38 @@ exports.selectArticles = query => {
     .then(() => {
       let { sort_by = 'created_at', order = 'desc', author, topic } = query;
       sort_by = sort_by === 'comment_count' ? sort_by : 'articles.' + sort_by;
-      return knex('articles')
-        .select('articles.author', 'articles.title', 'articles.article_id', 'articles.topic', 'articles.created_at', 'articles.votes')
-        .count('comments.comment_id AS comment_count')
-        .leftJoin('comments', 'articles.article_id', 'comments.article_id')
-        .groupBy('articles.article_id')
-        .orderBy(sort_by, order)
-        .modify(knexQuery => {
-          if (author) knexQuery.where('articles.author', '=', author);
-          if (topic) knexQuery.where('articles.topic', '=', topic);
-        });
+      return checkFilterExistence(author, topic).then(() => {
+        return knex('articles')
+          .select('articles.author', 'articles.title', 'articles.article_id', 'articles.topic', 'articles.created_at', 'articles.votes')
+          .count('comments.comment_id AS comment_count')
+          .leftJoin('comments', 'articles.article_id', 'comments.article_id')
+          .groupBy('articles.article_id')
+          .orderBy(sort_by, order)
+          .modify(knexQuery => {
+            if (author) knexQuery.where('articles.author', '=', author);
+            if (topic) knexQuery.where('articles.topic', '=', topic);
+          });
+      });
     })
     .then(articles => {
       return { article_count: articles.length, articles };
     });
+};
+
+const checkFilterExistence = (author, topic) => {
+  const authorCheck = author
+    ? knex('users')
+        .select('*')
+        .where('username', author)
+    : Promise.resolve([1]);
+  const topicCheck = topic
+    ? knex('topics')
+        .select('*')
+        .where('slug', topic)
+    : Promise.resolve([1]);
+  return Promise.all([authorCheck, topicCheck]).then(checks => {
+    const bothExist = checks.every(check => check.length > 0);
+    if (bothExist) return Promise.resolve();
+    return Promise.reject({ status: 404, msg: 'Author or Topic from query not found.' });
+  });
 };
