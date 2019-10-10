@@ -607,7 +607,28 @@ describe('/', () => {
                 });
             });
         });
+        it('DELETE / responds with 204', () => {
+          return request(app)
+            .delete('/api/comments/5')
+            .expect(204);
+        });
         describe('/:comment_id error states', () => {
+          it('DELETE /non-existent_comment_id - Responds 400 with error', () => {
+            return request(app)
+              .delete('/api/comments/9999')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal('Bad request. Could not find a comment with comment_id of "9999"');
+              });
+          });
+          it('DELETE /invalid_comment_id - Responds 400 with error', () => {
+            return request(app)
+              .delete('/api/comments/sdf')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.err).to.equal('Bad request. "sdf" is not a valid comment_id. Must be a number.');
+              });
+          });
           it('PATCH /:non-existent_comment_id - Responds 400 with error', () => {
             return request(app)
               .patch('/api/comments/9999')

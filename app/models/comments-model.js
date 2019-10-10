@@ -2,6 +2,7 @@ const knex = require('../../connection');
 const utils = require('../utils/app-utils');
 
 const selectCommentById = commentId => {
+  if (isNaN(commentId)) return Promise.reject({ status: 400, msg: `Bad request. "${commentId}" is not a valid comment_id. Must be a number.` });
   return knex('comments')
     .select('*')
     .where('comment_id', commentId)
@@ -12,7 +13,6 @@ const selectCommentById = commentId => {
 };
 
 exports.updateCommentVotes = (commentId, patchObj) => {
-  if (isNaN(commentId)) return Promise.reject({ status: 400, msg: `Bad request. "${commentId}" is not a valid comment_id. Must be a number.` });
   return utils
     .checkJsonKeys(patchObj, ['inc_votes'])
     .then(() => {
@@ -31,4 +31,12 @@ exports.updateCommentVotes = (commentId, patchObj) => {
     .then(([updatedComment]) => {
       return { updatedComment };
     });
+};
+
+exports.delCommentById = commentId => {
+  return selectCommentById(commentId).then(() => {
+    return knex('comments')
+      .where('comment_id', commentId)
+      .del();
+  });
 };
