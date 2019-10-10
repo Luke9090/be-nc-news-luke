@@ -37,6 +37,14 @@ describe('/', () => {
     return Promise.all([req1, req2, req3]);
   });
   describe('/api', () => {
+    it('GET / responds 200 with a JSON object documenting available endpoints', () => {
+      return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).to.be.an('object');
+        });
+    });
     describe('/topics', () => {
       it('GET / - responds 200 with an object containing an array of topics under the key "topics"', () => {
         return request(app)
