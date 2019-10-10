@@ -7,7 +7,7 @@ const selectCommentById = commentId => {
     .select('*')
     .where('comment_id', commentId)
     .then(commentArr => {
-      if (commentArr.length === 0) return Promise.reject({ status: 400, msg: `Bad request. Could not find a comment with comment_id of "${commentId}"` });
+      if (commentArr.length === 0) return Promise.reject({ status: 404, msg: `Not found. Could not find a comment with comment_id of "${commentId}"` });
       return commentArr[0];
     });
 };

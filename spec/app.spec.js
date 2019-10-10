@@ -28,12 +28,24 @@ describe('/', () => {
         expect(body.err).to.equal('File or path not found');
       });
     const req3 = request(app)
-      .delete('/kjhfgd')
+      .delete('/api/articles/3/sdfhjkgsdfk')
       .expect(404)
       .then(({ body }) => {
         expect(body).to.have.key('err');
         expect(body.err).to.equal('File or path not found');
       });
+    return Promise.all([req1, req2, req3]);
+  });
+  it('ALL /validpath with invalid method - responds 405 when trying to use invalid methods on valid paths', () => {
+    const req1 = request(app)
+      .put('/api/topics')
+      .expect(405);
+    const req2 = request(app)
+      .patch('/api/users/rogersob')
+      .expect(405);
+    const req3 = request(app)
+      .patch('/api/articles')
+      .expect(405);
     return Promise.all([req1, req2, req3]);
   });
   describe('/api', () => {
@@ -450,13 +462,13 @@ describe('/', () => {
           });
           describe('/comments error states', () => {
             describe('POSTing bad JSON', () => {
-              it("POST / - responds 400 with error message if sent JSON with username that doesn't exist", () => {
+              it("POST / - responds 404 with error message if sent JSON with username that doesn't exist", () => {
                 return request(app)
                   .post('/api/articles/2/comments')
                   .send({ username: 'rogers', body: 'FIRST, loooool' })
-                  .expect(400)
+                  .expect(404)
                   .then(({ body }) => {
-                    expect(body.err).to.equal('Bad request. The username "rogers" does not exist.');
+                    expect(body.err).to.equal('Not found. The username "rogers" does not exist.');
                   });
               });
               it('POST / - responds 400 with error message if sent JSON with one or more of: no username, no body, extra properties', () => {
@@ -621,12 +633,12 @@ describe('/', () => {
             .expect(204);
         });
         describe('/:comment_id error states', () => {
-          it('DELETE /non-existent_comment_id - Responds 400 with error', () => {
+          it('DELETE /non-existent_comment_id - Responds 404 with error', () => {
             return request(app)
               .delete('/api/comments/9999')
-              .expect(400)
+              .expect(404)
               .then(({ body }) => {
-                expect(body.err).to.equal('Bad request. Could not find a comment with comment_id of "9999"');
+                expect(body.err).to.equal('Not found. Could not find a comment with comment_id of "9999"');
               });
           });
           it('DELETE /invalid_comment_id - Responds 400 with error', () => {
@@ -637,13 +649,13 @@ describe('/', () => {
                 expect(body.err).to.equal('Bad request. "sdf" is not a valid comment_id. Must be a number.');
               });
           });
-          it('PATCH /:non-existent_comment_id - Responds 400 with error', () => {
+          it('PATCH /:non-existent_comment_id - Responds 404 with error', () => {
             return request(app)
               .patch('/api/comments/9999')
               .send({ inc_votes: 10 })
-              .expect(400)
+              .expect(404)
               .then(({ body }) => {
-                expect(body.err).to.equal('Bad request. Could not find a comment with comment_id of "9999"');
+                expect(body.err).to.equal('Not found. Could not find a comment with comment_id of "9999"');
               });
           });
           it('PATCH /:invalid_comment_id - Responds 400 with error', () => {

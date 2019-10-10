@@ -13,5 +13,6 @@ apiRouter.use('/users', usersRouter);
 apiRouter.use('/articles', articlesRouter);
 apiRouter.use('/comments', commentsRouter);
 apiRouter.get('/', getApiJson);
+apiRouter.all('/*', errHandlers.send404);
 
 module.exports = apiRouter;

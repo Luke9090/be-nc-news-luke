@@ -2,6 +2,10 @@ exports.send404 = (req, res, next) => {
   next({ status: 404, msg: 'File or path not found' });
 };
 
+exports.send405 = (req, res, next) => {
+  next({ status: 405 });
+};
+
 exports.sqlError = (err, req, res, next) => {
   switch (err.code) {
     case undefined:
@@ -15,7 +19,7 @@ exports.sqlError = (err, req, res, next) => {
       const errDetailRegex = /Key \(author\)=\(([\s\S]+)\) is not present in table "users"/;
       if (err.detail && errDetailRegex.test(err.detail)) {
         const invalidUsername = err.detail.match(errDetailRegex)[1];
-        next({ status: 400, msg: `Bad request. The username "${invalidUsername}" does not exist.` });
+        next({ status: 404, msg: `Not found. The username "${invalidUsername}" does not exist.` });
       } else {
         console.log(err);
         next({ status: 400, msg: 'Bad request. Some of the data you sent needed to match existing data and did not.' });
@@ -45,6 +49,12 @@ exports.JSONerror = (err, req, res, next) => {
 exports.msgWithStatus = (err, req, res, next) => {
   if (err.status && err.msg) {
     res.status(err.status).send({ err: err.msg });
+  } else next(err);
+};
+
+exports.statusOnly = (err, req, res, next) => {
+  if (err.status) {
+    res.sendStatus(err.status);
   } else next(err);
 };
 
