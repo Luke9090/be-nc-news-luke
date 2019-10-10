@@ -91,7 +91,7 @@ describe('/', () => {
           .expect(404)
           .then(({ body }) => {
             expect(body).to.have.key('err');
-            expect(body.err).to.eql('Could not find a user with the username "non-existent-user"');
+            expect(body.err).to.eql("Could not find a user with the username 'non-existent-user'");
           });
       });
     });
