@@ -13,7 +13,7 @@
     "db-rollback": "knex migrate:rollback",
     "db-latest": "knex migrate:latest",
     "server": "knex seed:run && nodemon app/listen.js",
-    "start": "node listen.js",
+    "start": "node app/listen.js",
     "seed:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex seed:run",
     "migrate-latest:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:latest",
     "migrate-rollback:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:rollback"
