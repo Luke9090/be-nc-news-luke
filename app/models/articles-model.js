@@ -70,9 +70,6 @@ exports.insertCommentOnArticle = (articleId, comment) => {
 exports.selectCommentsByArticle = (articleId, query) => {
   const { sort_by = 'created_at', order = 'desc' } = query;
   if (order !== 'desc' && order !== 'asc') return Promise.reject({ status: 400, msg: "Bad Request. Order must be either 'asc' or 'desc'" });
-  // if (query.sort_by) delete query.sort_by;
-  // if (query.order) delete query.order;
-  // if (Object.keys(query).length > 0) return Promise.reject({ status: 400, msg: "Bad Request. Query keys must be 'order' and/or 'sort_by'" });
   return utils
     .checkQueryKeys(query, ['sort_by', 'order'])
     .then(() => {
