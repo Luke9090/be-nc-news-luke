@@ -347,11 +347,11 @@ describe('/', () => {
           });
         });
         describe('/comments', () => {
-          it('POST / - responds 200 with an object containing a comment object under the key postedComment', () => {
+          it('POST / - responds 201 with an object containing a comment object under the key postedComment', () => {
             return request(app)
               .post('/api/articles/2/comments')
               .send({ username: 'rogersop', body: 'FIRST, loooool' })
-              .expect(200)
+              .expect(201)
               .then(({ body }) => {
                 expect(body).to.have.key('postedComment');
                 expect(body.postedComment).to.have.keys('author', 'body', 'comment_id', 'created_at', 'votes', 'article_id');
@@ -368,7 +368,7 @@ describe('/', () => {
                 return request(app)
                   .post('/api/articles/2/comments')
                   .send({ username: 'icellusedkars', body: 'SECOND, loooool' })
-                  .expect(200);
+                  .expect(201);
               })
               .then(({ body }) => {
                 expect(body).to.have.key('postedComment');

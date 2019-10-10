@@ -19,7 +19,7 @@ exports.patchArticlesById = (req, res, next) => {
 exports.postCommentOnArticle = (req, res, next) => {
   insertCommentOnArticle(req.params.article_id, req.body)
     .then(comment => {
-      res.status(200).send(comment);
+      res.status(201).send(comment);
     })
     .catch(next);
 };
