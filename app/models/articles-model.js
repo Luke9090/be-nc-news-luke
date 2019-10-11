@@ -86,26 +86,62 @@ exports.selectCommentsByArticle = (articleId, query) => {
 };
 
 exports.selectArticles = query => {
+  query = utils.renameKeys(query, ['s', 'sort_by'], ['t', 'topic'], ['o', 'order'], ['a', 'author'], ['l', 'limit'], ['p', 'page']);
+  let { sort_by = 'created_at', order = 'desc', author, topic, limit, page } = query;
+  sort_by = sort_by === 'comment_count' ? sort_by : 'articles.' + sort_by;
+  if (!limit && page) return Promise.reject({ status: 400, msg: `Bad request. Can't give paginated response if no limit is defined in query` });
   return utils
-    .checkQueryKeys(query, { sort_by: [], order: ['asc', 'desc'], author: [], topic: [] })
+    .checkQueryKeys(query, { sort_by: [], order: ['asc', 'desc'], author: [], topic: [], limit: utils.isNum, page: utils.isNum })
     .then(() => {
-      let { sort_by = 'created_at', order = 'desc', author, topic } = query;
-      sort_by = sort_by === 'comment_count' ? sort_by : 'articles.' + sort_by;
-      return checkFilterExistence(author, topic).then(() => {
-        return knex('articles')
-          .select('articles.author', 'articles.title', 'articles.article_id', 'articles.topic', 'articles.created_at', 'articles.votes')
-          .count('comments.comment_id AS comment_count')
-          .leftJoin('comments', 'articles.article_id', 'comments.article_id')
-          .groupBy('articles.article_id')
-          .orderBy(sort_by, order)
-          .modify(knexQuery => {
-            if (author) knexQuery.where('articles.author', '=', author);
-            if (topic) knexQuery.where('articles.topic', '=', topic);
-          });
-      });
+      return checkFilterExistence(author, topic);
+    })
+    .then(() => {
+      return knex('articles')
+        .select('articles.author', 'articles.title', 'articles.article_id', 'articles.topic', 'articles.created_at', 'articles.votes')
+        .count('comments.comment_id AS comment_count')
+        .leftJoin('comments', 'articles.article_id', 'comments.article_id')
+        .groupBy('articles.article_id')
+        .orderBy(sort_by, order)
+        .modify(knexQuery => {
+          if (author) knexQuery.where('articles.author', '=', author);
+          if (topic) knexQuery.where('articles.topic', '=', topic);
+        });
     })
     .then(articles => {
+      articles.forEach(article => {
+        article.comment_count = Number(article.comment_count);
+      });
       return { article_count: articles.length, articles };
+    })
+    .then(unlimitedRes => {
+      if (!limit) return unlimitedRes;
+      if (page > 1 && page > Math.ceil(unlimitedRes.article_count / limit))
+        return Promise.reject({
+          status: 404,
+          msg: `Not found. Requested page ${page} but there are only ${Math.ceil(unlimitedRes.article_count / limit)} pages available.`
+        });
+      return (limited = knex('articles')
+        .select('articles.author', 'articles.title', 'articles.article_id', 'articles.topic', 'articles.created_at', 'articles.votes')
+        .count('comments.comment_id AS comment_count')
+        .leftJoin('comments', 'articles.article_id', 'comments.article_id')
+        .groupBy('articles.article_id')
+        .orderBy(sort_by, order)
+        .modify(knexQuery => {
+          if (author) knexQuery.where('articles.author', '=', author);
+          if (topic) knexQuery.where('articles.topic', '=', topic);
+          if (limit) knexQuery.limit(limit);
+          if (page) knexQuery.offset((page - 1) * limit);
+        })
+        .then(limited => {
+          limited.forEach(article => {
+            article.comment_count = Number(article.comment_count);
+          });
+          unlimitedRes.articles = limited;
+          unlimitedRes.page = Number(page) || 1;
+          unlimitedRes.available_pages = Math.ceil(unlimitedRes.article_count / limit);
+          // console.log(unlimitedRes);
+          return unlimitedRes;
+        }));
     });
 };
 
