@@ -763,6 +763,46 @@ describe('/', () => {
                     expect(body.err).to.equal('Bad request. Query can only include the following keys: sort_by, order, author, limit, page');
                   });
               });
+              it('GET ?limit=5&page=4 - responds 404 with error when too high a page is requested', () => {
+                return request(app)
+                  .get('/api/articles/1/comments?limit=5&page=4')
+                  .expect(404)
+                  .then(({ body }) => {
+                    expect(body.err).to.equal('Not found. Requested page 4 but there are only 3 pages available.');
+                  });
+              });
+              it('GET ?limit=dog - responds 400 with error when non-numerical limit is given in query', () => {
+                return request(app)
+                  .get('/api/articles/1/comments?limit=dog')
+                  .expect(400)
+                  .then(({ body }) => {
+                    expect(body.err).to.equal('Bad request. Unexpected value for limit in query.');
+                  });
+              });
+              it('GET ?limit=0 - responds 400 with error when limit and/or page are zero or below', () => {
+                return request(app)
+                  .get('/api/articles/1/comments?limit=0')
+                  .expect(400)
+                  .then(({ body }) => {
+                    expect(body.err).to.equal('Bad request. Unexpected value for limit in query.');
+                  });
+              });
+              it('GET ?limit=3&page=banana - responds 400 with error when non-numerical limit is given in query', () => {
+                return request(app)
+                  .get('/api/articles/1/comments?limit=3&page=banana')
+                  .expect(400)
+                  .then(({ body }) => {
+                    expect(body.err).to.equal('Bad request. Unexpected value for page in query.');
+                  });
+              });
+              it('GET ?page=2 - responds 400 with error when query contains a page but no limit', () => {
+                return request(app)
+                  .get('/api/articles/1/comments?page=2')
+                  .expect(400)
+                  .then(({ body }) => {
+                    expect(body.err).to.equal("Bad request. Can't give paginated response if no limit is defined in query");
+                  });
+              });
             });
             describe('GETs or POSTS under bad articleIds', () => {
               it('GET or POST - /:invalid_article_id/comments - responds 400 with an object containing an error message under the key "err"', () => {
