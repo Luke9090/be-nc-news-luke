@@ -9,8 +9,8 @@ utils.renameKeys = (obj, ...pairs) => {
   return newObj;
 };
 
-utils.checkId = id => {
-  if (!Number(id)) return Promise.reject({ status: 400, msg: `"${id}" is not a valid article ID. Expected a number.` });
+utils.checkId = (id, type) => {
+  if (!Number(id)) return Promise.reject({ status: 400, msg: `"${id}" is not a valid ${type} ID. Expected a number.` });
   else return Promise.resolve();
 };
 
