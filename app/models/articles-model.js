@@ -86,12 +86,12 @@ exports.selectCommentsByArticle = (articleId, query) => {
 };
 
 exports.selectArticles = query => {
-  query = utils.renameKeys(query, ['s', 'sort_by'], ['t', 'topic'], ['o', 'order'], ['a', 'author'], ['l', 'limit'], ['p', 'page']);
-  let { sort_by = 'created_at', order = 'desc', author, topic, limit, page } = query;
+  const newQuery = utils.renameKeys(query, ['s', 'sort_by'], ['t', 'topic'], ['o', 'order'], ['a', 'author'], ['l', 'limit'], ['p', 'page']);
+  let { sort_by = 'created_at', order = 'desc', author, topic, limit, page } = newQuery;
   sort_by = sort_by === 'comment_count' ? sort_by : 'articles.' + sort_by;
   if (!limit && page) return Promise.reject({ status: 400, msg: `Bad request. Can't give paginated response if no limit is defined in query` });
   return utils
-    .checkQueryKeys(query, { sort_by: [], order: ['asc', 'desc'], author: [], topic: [], limit: utils.isNum, page: utils.isNum })
+    .checkQueryKeys(newQuery, { sort_by: [], order: ['asc', 'desc'], author: [], topic: [], limit: utils.isNum, page: utils.isNum })
     .then(() => {
       return checkFilterExistence(author, topic);
     })
@@ -139,7 +139,6 @@ exports.selectArticles = query => {
           unlimitedRes.articles = limited;
           unlimitedRes.page = Number(page) || 1;
           unlimitedRes.available_pages = Math.ceil(unlimitedRes.article_count / limit);
-          // console.log(unlimitedRes);
           return unlimitedRes;
         }));
     });
