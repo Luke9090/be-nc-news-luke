@@ -279,7 +279,6 @@ describe('/', () => {
             .delete('/api/articles/2')
             .expect(204);
         });
-        // check deletion of associated comments
         it('DELETE /:article_id - also deletes comments linked to article', () => {
           return request(app)
             .delete('/api/articles/1')
@@ -328,7 +327,7 @@ describe('/', () => {
                 expect(body.err).to.equal('Bad request. The value of inc_votes must be a number.');
               });
           });
-          it('GET or PATCH - /:invalid_article_id - responds 400 with an object containing an error message under the key "err"', () => {
+          it('GET, PATCH or DELETE - /:invalid_article_id - responds 400 with an object containing an error message under the key "err"', () => {
             const getReq = request(app)
               .get('/api/articles/invalid-article-id')
               .expect(400)
@@ -344,7 +343,14 @@ describe('/', () => {
                 expect(body).to.have.key('err');
                 expect(body.err).to.eql('"invalid-article-id" is not a valid article ID. Expected a number.');
               });
-            return Promise.all([getReq, patchReq]);
+            const delReq = request(app)
+              .delete('/api/articles/invalid-article-id')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body).to.have.key('err');
+                expect(body.err).to.eql('"invalid-article-id" is not a valid article ID. Expected a number.');
+              });
+            return Promise.all([getReq, patchReq, delReq]);
           });
           it('GET or PATCH - /:non-existent_article_id - responds 404 with an object containing an error message under the key "err"', () => {
             const getReq = request(app)
