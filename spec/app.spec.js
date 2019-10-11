@@ -352,7 +352,7 @@ describe('/', () => {
               });
             return Promise.all([getReq, patchReq, delReq]);
           });
-          it('GET or PATCH - /:non-existent_article_id - responds 404 with an object containing an error message under the key "err"', () => {
+          it('GET, PATCH or DELETE - /:non-existent_article_id - responds 404 with an object containing an error message under the key "err"', () => {
             const getReq = request(app)
               .get('/api/articles/9999')
               .expect(404)
@@ -368,7 +368,14 @@ describe('/', () => {
                 expect(body).to.have.key('err');
                 expect(body.err).to.eql('Could not find an article with the article ID "9999".');
               });
-            return Promise.all([getReq, patchReq]);
+            const delReq = request(app)
+              .delete('/api/articles/9999')
+              .expect(404)
+              .then(({ body }) => {
+                expect(body).to.have.key('err');
+                expect(body.err).to.eql('Could not find an article with the article ID "9999".');
+              });
+            return Promise.all([getReq, patchReq, delReq]);
           });
         });
         describe('/comments', () => {

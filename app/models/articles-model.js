@@ -128,9 +128,14 @@ const checkFilterExistence = (author, topic) => {
 };
 
 exports.delArticleById = articleId => {
-  return utils.checkId(articleId, 'article').then(() => {
-    return knex('articles')
-      .where('article_id', articleId)
-      .delete();
-  });
+  return utils
+    .checkId(articleId, 'article')
+    .then(() => {
+      return knex('articles')
+        .where('article_id', articleId)
+        .delete();
+    })
+    .then(deletions => {
+      if (!deletions) return Promise.reject({ status: 404, msg: `Could not find an article with the article ID "${articleId}".` });
+    });
 };
