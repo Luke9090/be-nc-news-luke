@@ -263,7 +263,6 @@ describe('/', () => {
           });
       });
       describe('/articles error states', () => {
-        // responds 404 when page is too high?
         it('GET ?limit=5&page=4 - responds 404 with error when too high a page is requested', () => {
           return request(app)
             .get('/api/articles?limit=5&page=4')
@@ -272,7 +271,6 @@ describe('/', () => {
               expect(body.err).to.equal('Not found. Requested page 4 but there are only 3 pages available.');
             });
         });
-        // limit value not number
         it('GET ?limit=dog - responds 400 with error when non-numerical limit is given in query', () => {
           return request(app)
             .get('/api/articles?limit=dog')
@@ -281,7 +279,14 @@ describe('/', () => {
               expect(body.err).to.equal('Bad request. Unexpected value for limit in query.');
             });
         });
-        // page value not number
+        it('GET ?limit=0 - responds 400 with error when limit and/or page are zero or below', () => {
+          return request(app)
+            .get('/api/articles?limit=0')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.err).to.equal('Bad request. Unexpected value for limit in query.');
+            });
+        });
         it('GET ?limit=3&page=banana - responds 400 with error when non-numerical limit is given in query', () => {
           return request(app)
             .get('/api/articles?limit=3&page=banana')
@@ -290,7 +295,6 @@ describe('/', () => {
               expect(body.err).to.equal('Bad request. Unexpected value for page in query.');
             });
         });
-        // page value without limit
         it('GET ?page=2 - responds 400 with error when query contains a page but no limit', () => {
           return request(app)
             .get('/api/articles?page=2')
@@ -599,6 +603,80 @@ describe('/', () => {
               });
             return Promise.all([votesReq, defaultReq, bodyReq]);
           });
+          it('GET / - responds 200 and accepts shortened forms of query keys', () => {
+            return request(app)
+              .get('/api/articles/1/comments?s=votes&o=asc')
+              .expect(200)
+              .then(({ body: { comments } }) => {
+                for (let i = 1; i < comments.length; i++) {
+                  expect(comments[i].votes).to.be.at.least(comments[i - 1].votes);
+                }
+              });
+          });
+          it('GET ?limit=5 - responds 200 and only returns 5 results', () => {
+            return request(app)
+              .get('/api/articles/1/comments?limit=5')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments.length).to.equal(5);
+              });
+          });
+          it('GET ?limit=5 - still includes full comment count', () => {
+            return request(app)
+              .get('/api/articles/1/comments?limit=5')
+              .then(({ body }) => {
+                expect(body.comment_count).to.equal(13);
+              });
+          });
+          it('GET ?limit=5&page=2 - responds 200 with the 6th to 10th results', () => {
+            return request(app)
+              .get('/api/articles/1/comments')
+              .then(({ body }) => {
+                const allComments = body.comments;
+                return request(app)
+                  .get('/api/articles/1/comments?limit=5&page=2')
+                  .expect(200)
+                  .then(({ body: { comments } }) => {
+                    expect(comments.length).to.equal(5);
+                    expect(comments[0]).to.eql(allComments[5]);
+                    expect(comments[4]).to.eql(allComments[9]);
+                  });
+              });
+          });
+          it('GET ?limit=5&page=3 - responds 200 with the 11th and 13th results', () => {
+            return request(app)
+              .get('/api/articles/1/comments')
+              .then(({ body }) => {
+                const allComments = body.comments;
+                return request(app)
+                  .get('/api/articles/1/comments?limit=5&page=3')
+                  .expect(200)
+                  .then(({ body: { comments } }) => {
+                    expect(comments.length).to.equal(3);
+                    expect(comments[0]).to.eql(allComments[10]);
+                    expect(comments[2]).to.eql(allComments[12]);
+                  });
+              });
+          });
+          it('GET ?limit=5&page=2 - responds 200 and includes current page and available pages properties', () => {
+            return request(app)
+              .get('/api/articles/1/comments?limit=5&page=2')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.page).to.equal(2);
+                expect(body.available_pages).to.equal(3);
+              });
+          });
+          it('GET ?limit=50 - responds 200 with all available results when the limit is greater than the results, still including page properties', () => {
+            return request(app)
+              .get('/api/articles/1/comments?limit=50')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comments.length).to.equal(13);
+                expect(body.page).to.equal(1);
+                expect(body.available_pages).to.equal(1);
+              });
+          });
           describe('/comments error states', () => {
             describe('POSTing bad JSON', () => {
               it("POST / - responds 404 with error message if sent JSON with username that doesn't exist", () => {
@@ -682,7 +760,7 @@ describe('/', () => {
                   .get('/api/articles/1/comments?badKey=anything')
                   .expect(400)
                   .then(({ body }) => {
-                    expect(body.err).to.equal('Bad request. Query can only include the following keys: sort_by, order');
+                    expect(body.err).to.equal('Bad request. Query can only include the following keys: sort_by, order, author, limit, page');
                   });
               });
             });

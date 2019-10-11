@@ -68,9 +68,11 @@ exports.insertCommentOnArticle = (articleId, comment) => {
 };
 
 exports.selectCommentsByArticle = (articleId, query) => {
-  const { sort_by = 'created_at', order = 'desc' } = query;
+  const newQuery = utils.renameKeys(query, ['s', 'sort_by'], ['o', 'order'], ['a', 'author'], ['l', 'limit'], ['p', 'page']);
+  let { sort_by = 'created_at', order = 'desc', author, topic, limit, page } = newQuery;
+  if (!limit && page) return Promise.reject({ status: 400, msg: `Bad request. Can't give paginated response if no limit is defined in query` });
   return utils
-    .checkQueryKeys(query, { sort_by: [], order: ['asc', 'desc'] })
+    .checkQueryKeys(newQuery, { sort_by: [], order: ['asc', 'desc'], author: [], limit: utils.isNum, page: utils.isNum })
     .then(() => {
       return selectArticlesById(articleId);
     })
@@ -78,10 +80,15 @@ exports.selectCommentsByArticle = (articleId, query) => {
       return knex('comments')
         .select('comment_id', 'votes', 'created_at', 'author', 'body')
         .where('article_id', articleId)
-        .orderBy(sort_by, order);
+        .orderBy(sort_by, order)
+        .modify(knexQuery => {
+          if (author) knexQuery.where('comments.author', '=', author);
+        });
     })
     .then(comments => {
-      return { article_id: articleId, comment_count: comments.length, comments };
+      const returnObj = { article_id: articleId, comment_count: comments.length, comments };
+      if (limit) return utils.paginate(returnObj, 'comment', limit, page);
+      return returnObj;
     });
 };
 

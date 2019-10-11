@@ -33,8 +33,25 @@ utils.checkQueryKeys = (query, validation) => {
   return Promise.resolve();
 };
 
+utils.paginate = (obj, name, limit, page = 1) => {
+  const newObj = { ...obj };
+
+  if (page > 1 && page > Math.ceil(newObj[name + '_count'] / limit))
+    return Promise.reject({
+      status: 404,
+      msg: `Not found. Requested page ${page} but there are only ${Math.ceil(newObj[name + '_count'] / limit)} pages available.`
+    });
+
+  const start = (page - 1) * limit;
+  const end = page * limit;
+  newObj[name + 's'] = newObj[name + 's'].slice(start, end);
+  newObj.page = Number(page);
+  newObj.available_pages = Math.ceil(newObj[name + '_count'] / limit);
+  return newObj;
+};
+
 utils.isNum = val => {
-  return !isNaN(val);
+  return !isNaN(val) && Number(val) > 0;
 };
 
 utils.checkJsonKeys = (query, validKeys) => {
