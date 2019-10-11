@@ -216,6 +216,14 @@ describe('/', () => {
               expect(body.err).to.equal("Bad request. Perhaps you meant 'author'");
             });
         });
+        it('GET /?order=badOrder - responds 400 with error message', () => {
+          return request(app)
+            .get('/api/articles?order=badOrder')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.err).to.equal("Bad request - order must be one of: 'asc', 'desc'");
+            });
+        });
         it('GET ?filter=non-existent-value - responds with 404 and an error message', () => {
           return request(app)
             .get('/api/articles?author=non-existent-author')
@@ -271,6 +279,7 @@ describe('/', () => {
             .delete('/api/articles/2')
             .expect(204);
         });
+        // check deletion of associated comments
         describe('/:article_id error states', () => {
           it('PATCH /:article_id - responds 400 with error message if sent invalid JSON', () => {
             return request(app)
@@ -536,7 +545,7 @@ describe('/', () => {
                   .get('/api/articles/1/comments?order=badOrder')
                   .expect(400)
                   .then(({ body }) => {
-                    expect(body.err).to.equal("Bad Request. Order must be either 'asc' or 'desc'");
+                    expect(body.err).to.equal("Bad request - order must be one of: 'asc', 'desc'");
                   });
               });
               it('GET /?badKey=anything - responds 400 with error message', () => {
