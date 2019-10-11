@@ -69,16 +69,16 @@ exports.insertCommentOnArticle = (articleId, comment) => {
 
 exports.selectCommentsByArticle = (articleId, query) => {
   const { sort_by = 'created_at', order = 'desc' } = query;
-  if (order !== 'desc' && order !== 'asc') return Promise.reject({ status: 400, msg: "Bad Request. Order must be either 'asc' or 'desc'" });
   return utils
-    .checkQueryKeys(query, ['sort_by', 'order'])
+    .checkQueryKeys(query, { sort_by: [], order: ['asc', 'desc'] })
     .then(() => {
-      return selectArticlesById(articleId).then(() => {
-        return knex('comments')
-          .select('comment_id', 'votes', 'created_at', 'author', 'body')
-          .where('article_id', articleId)
-          .orderBy(sort_by, order);
-      });
+      return selectArticlesById(articleId);
+    })
+    .then(() => {
+      return knex('comments')
+        .select('comment_id', 'votes', 'created_at', 'author', 'body')
+        .where('article_id', articleId)
+        .orderBy(sort_by, order);
     })
     .then(comments => {
       return { article_id: articleId, comment_count: comments.length, comments };
@@ -87,7 +87,7 @@ exports.selectCommentsByArticle = (articleId, query) => {
 
 exports.selectArticles = query => {
   return utils
-    .checkQueryKeys(query, ['sort_by', 'order', 'author', 'topic'])
+    .checkQueryKeys(query, { sort_by: [], order: ['asc', 'desc'], author: [], topic: [] })
     .then(() => {
       let { sort_by = 'created_at', order = 'desc', author, topic } = query;
       sort_by = sort_by === 'comment_count' ? sort_by : 'articles.' + sort_by;
@@ -125,4 +125,10 @@ const checkFilterExistence = (author, topic) => {
     if (bothExist) return Promise.resolve();
     return Promise.reject({ status: 404, msg: 'Author or Topic from query not found.' });
   });
+};
+
+exports.delArticleById = articleId => {
+  return knex('articles')
+    .where('article_id', articleId)
+    .delete();
 };

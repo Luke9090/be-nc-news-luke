@@ -14,10 +14,19 @@ utils.checkId = (id, type) => {
   else return Promise.resolve();
 };
 
-utils.checkQueryKeys = (query, validKeys) => {
+utils.checkQueryKeys = (query, validation) => {
+  // Accepts a query and a validation object with accepted query keys whose values are an array of acceptable values (or a blank array if not testing values)
+  const validKeys = Object.keys(validation);
   const validity = Object.keys(query).every(key => validKeys.includes(key));
-  if (validity) return Promise.resolve();
-  else return Promise.reject({ status: 400, msg: `Bad request. Query can only include the following keys: ${validKeys.join(', ')}` });
+  if (!validity) return Promise.reject({ status: 400, msg: `Bad request. Query can only include the following keys: ${validKeys.join(', ')}` });
+  for (let i = 0; i < validKeys.length; i++) {
+    const key = validKeys[i];
+    if (query[key] && validation[key].length) {
+      if (!validation[key].includes(query[key]))
+        return Promise.reject({ status: 400, msg: `Bad request - ${key} must be one of: '${validation[key].join("', '")}'` });
+    }
+  }
+  return Promise.resolve();
 };
 
 utils.checkJsonKeys = (query, validKeys) => {
