@@ -128,7 +128,9 @@ const checkFilterExistence = (author, topic) => {
 };
 
 exports.delArticleById = articleId => {
-  return knex('articles')
-    .where('article_id', articleId)
-    .delete();
+  return utils.checkId(articleId, 'article').then(() => {
+    return knex('articles')
+      .where('article_id', articleId)
+      .delete();
+  });
 };
