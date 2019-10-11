@@ -266,6 +266,11 @@ describe('/', () => {
               expect(body.article).to.eql(expected);
             });
         });
+        it('DELETE /:article_id - responds 204', () => {
+          return request(app)
+            .delete('/api/articles/2')
+            .expect(204);
+        });
         describe('/:article_id error states', () => {
           it('PATCH /:article_id - responds 400 with error message if sent invalid JSON', () => {
             return request(app)
