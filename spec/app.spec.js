@@ -280,6 +280,15 @@ describe('/', () => {
             .expect(204);
         });
         // check deletion of associated comments
+        it('DELETE /:article_id - also deletes comments linked to article', () => {
+          return request(app)
+            .delete('/api/articles/1')
+            .then(() => {
+              return request(app)
+                .delete('/api/comments/2')
+                .expect(404);
+            });
+        });
         describe('/:article_id error states', () => {
           it('PATCH /:article_id - responds 400 with error message if sent invalid JSON', () => {
             return request(app)
