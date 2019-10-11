@@ -3,7 +3,7 @@ const utils = require('../utils/app-utils');
 
 const selectArticlesById = articleId => {
   return utils
-    .checkId(articleId)
+    .checkId(articleId, 'article')
     .then(() => {
       return knex('articles')
         .select('articles.*')
@@ -26,17 +26,17 @@ exports.updateArticlesById = (articleId, body) => {
       return utils.checkIncVotes(body.inc_votes);
     })
     .then(() => {
-      return selectArticlesById(articleId);
+      return utils.checkId(articleId, 'article');
     })
-    .then(({ article }) => {
-      const newVotes = article.votes + body.inc_votes;
+    .then(() => {
       return knex('articles')
-        .update('votes', newVotes)
+        .increment('votes', body.inc_votes)
         .where('article_id', articleId)
         .returning('*');
     })
     .then(articleArr => {
-      return { article: articleArr[0] };
+      if (articleArr.length) return { article: articleArr[0] };
+      return Promise.reject({ status: 404, msg: `Could not find an article with the article ID "${articleId}".` });
     });
 };
 
