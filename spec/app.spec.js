@@ -191,13 +191,28 @@ describe('/', () => {
             expect(articles[0].title.startsWith('Seven')).to.be.true;
           });
       });
+      it('GET ?limit=5 - responds 200 and only returns 5 results', () => {
+        return request(app)
+          .get('/api/articles?limit=5')
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles.length).to.equal(5);
+          });
+      });
+      // still includes full article count
+      // includes current page and count of pages
+      // accepts limits higher than article count and still gives page-y response
       describe('/articles error states', () => {
+        // responds 404 when page is too high?
+        // limit value not number
+        // page value not number
+        // ^^ Edit utils.checkQuery to accept truth-returning function instead of just arrays
         it('GET ?badkey=something - responds with 400 and error message', () => {
           return request(app)
             .get('/api/articles?badkey=something')
             .expect(400)
             .then(({ body }) => {
-              expect(body.err).to.equal('Bad request. Query can only include the following keys: sort_by, order, author, topic');
+              expect(body.err).to.equal('Bad request. Query can only include the following keys: sort_by, order, author, topic, limit, page');
             });
         });
         it('GET ?sort_by=non-existent-column - responds with 400 and error message', () => {
