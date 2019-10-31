@@ -74,6 +74,18 @@ describe('/', () => {
       });
     });
     describe('/users', () => {
+      it('GET / responds 200 with an array of user objects under the key "users", with each user having a username, avatar url and name', () => {
+        return request(app)
+          .get('/api/users')
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).to.have.key('users');
+            expect(body.users).to.be.an('array');
+            body.users.forEach(user => {
+              expect(user).to.have.keys('username', 'avatar_url', 'name');
+            });
+          });
+      });
       it('GET /:username - responds 200 with an object containing a user object under the key "user"', () => {
         return request(app)
           .get('/api/users/rogersop')

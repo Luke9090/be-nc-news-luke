@@ -9,6 +9,19 @@
       "topics": [{ "slug": "football", "description": "Footie!" }]
     }
   },
+  "GET /api/users": {
+    "description": "serves an array of user objects",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        {
+          "username": "tickle122",
+          "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
+          "name": "Tom Tickle"
+        }
+      ]
+    }
+  },
   "GET /api/users/:username": {
     "description": "serves a user object",
     "queries": [],
