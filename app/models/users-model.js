@@ -36,3 +36,12 @@ exports.selectUserCommentsByUsername = username => {
       return { comments };
     });
 };
+
+exports.selectUserValidity = username => {
+  return knex('users')
+    .select('username')
+    .where('username', username)
+    .then(users => {
+      return {exists: users.length===1};
+    });
+}

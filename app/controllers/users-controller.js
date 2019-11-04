@@ -1,4 +1,4 @@
-const { selectUserByUsername, selectUsers, selectUserCommentsByUsername } = require('../models/users-model');
+const { selectUserByUsername, selectUsers, selectUserCommentsByUsername, selectUserValidity } = require('../models/users-model');
 
 exports.getUsers = (req, res, next) => {
   selectUsers()
@@ -23,3 +23,9 @@ exports.getUserCommentsByUsername = (req, res, next) => {
     })
     .catch(next);
 };
+
+exports.getUserValidity = (req,res,next) => {
+  selectUserValidity(req.params.username).then(exists => {
+    res.status(200).send(exists);
+  });
+}
