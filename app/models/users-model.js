@@ -25,3 +25,13 @@ exports.selectUserByUsername = username => {
       else return { user: userArr[0] };
     });
 };
+
+exports.selectUserCommentsByUsername = username => {
+  return knex('comments')
+    .select('comments.*', 'articles.title')
+    .where('comments.author', username)
+    .leftJoin('articles', 'articles.article_id', 'comments.article_id')
+    .then(comments => {
+      return { comments };
+    });
+};
