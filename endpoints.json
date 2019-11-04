@@ -17,7 +17,9 @@
         {
           "username": "tickle122",
           "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
-          "name": "Tom Tickle"
+          "name": "Tom Tickle",
+          "article_count": 10,
+          "comment_count": 40
         }
       ]
     }
@@ -29,7 +31,9 @@
       "user": {
         "username": "tickle122",
         "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
-        "name": "Tom Tickle"
+        "name": "Tom Tickle",
+        "article_count": 10,
+        "comment_count": 40
       }
     }
   },
