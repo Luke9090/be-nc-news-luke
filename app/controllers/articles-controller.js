@@ -4,7 +4,8 @@ const {
   insertCommentOnArticle,
   selectCommentsByArticle,
   selectArticles,
-  delArticleById
+  delArticleById,
+  insertArticle
 } = require('../models/articles-model');
 
 exports.getArticlesById = (req, res, next) => {
@@ -54,3 +55,11 @@ exports.deleteArticleById = (req, res, next) => {
     })
     .catch(next);
 };
+
+exports.postArticle = (req,res,next) => {
+  insertArticle(req.params.article_id, req.body)
+    .then(article => {
+      res.status(201).send(article);
+    })
+    .catch(next);
+}

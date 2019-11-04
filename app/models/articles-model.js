@@ -181,3 +181,34 @@ exports.delArticleById = articleId => {
       if (!deletions) return Promise.reject({ status: 404, msg: `Could not find an article with the article ID "${articleId}".` });
     });
 };
+
+exports.insertArticle = (articleId, articleInput) => {
+  
+}
+
+// exports.insertCommentOnArticle = (articleId, comment) => {
+//   return selectArticlesById(articleId)
+//     .then(() => {
+//       if (
+//         Object.keys(comment)
+//           .sort()
+//           .join(',') !== 'body,username'
+//       )
+//         return Promise.reject({
+//           status: 400,
+//           msg: 'Missing or superfluous keys. The JSON object you send must have keys for body, username and no others'
+//         });
+//       if (typeof comment.username !== 'string' || comment.username.length === 0)
+//         return Promise.reject({ status: 400, msg: 'Invalid username. Username must be a string.' });
+//       if (typeof comment.body !== 'string' || comment.body.length === 0)
+//         return Promise.reject({ status: 400, msg: 'Invalid comment body. Comment body must be a string of non-zero length.' });
+
+//       comment.article_id = articleId;
+//       return knex('comments')
+//         .insert(utils.renameKeys(comment, ['username', 'author']))
+//         .returning('*');
+//     })
+//     .then(([comment]) => {
+//       return { comment };
+//     });
+// };
