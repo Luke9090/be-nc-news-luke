@@ -31,6 +31,7 @@ exports.selectUserCommentsByUsername = username => {
     .select('comments.*', 'articles.title AS article_title')
     .where('comments.author', username)
     .leftJoin('articles', 'articles.article_id', 'comments.article_id')
+    .orderBy('created_at', 'desc')
     .then(comments => {
       return { comments };
     });
