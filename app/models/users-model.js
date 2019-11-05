@@ -1,12 +1,18 @@
 const knex = require('../../connection');
+const utils = require('../utils/app-utils');
 
-exports.selectUsers = () => {
-  return knex('users')
-    .select('username', 'avatar_url', 'name')
-    .countDistinct({ comment_count: 'comment_id', article_count: 'title' })
-    .leftJoin('articles', 'articles.author', 'username')
-    .leftJoin('comments', 'comments.author', 'username')
-    .groupBy('username')
+exports.selectUsers = query => {
+  console.log(query);
+  return utils
+    .checkQueryKeys(query, { sort_by: ['username', 'comment_count', 'article_count', 'comment_votes', 'article_votes', 'total_votes'], order: ['asc', 'desc'] })
+    .then(() => {
+      return knex('users')
+        .select('username', 'avatar_url', 'name')
+        .countDistinct({ comment_count: 'comment_id', article_count: 'title' })
+        .leftJoin('articles', 'articles.author', 'username')
+        .leftJoin('comments', 'comments.author', 'username')
+        .groupBy('username');
+    })
     .then(users => {
       const commentVotes = knex('comments')
         .select('author')
@@ -22,9 +28,17 @@ exports.selectUsers = () => {
       users.forEach(user => {
         user.comment_votes = commentVotes.find(voteObj => voteObj.author === user.username).comment_votes;
         user.article_votes = articleVotes.find(voteObj => voteObj.author === user.username).article_votes;
-        user.total_votes = parseInt(user.comment_votes) + parseInt(user.article_votes);
+        user.total_votes = `${parseInt(user.comment_votes) + parseInt(user.article_votes)}`;
       });
-      return { users };
+      return {
+        users: users.sort((user1, user2) => {
+          const { sort_by = 'username', order = 'asc' } = query;
+          let sortResult = 0;
+          if (sort_by === 'username') sortResult = user1.username.localeCompare(user2.username);
+          else sortResult = parseInt(user1[sort_by]) - parseInt(user2[sort_by]);
+          return order === 'asc' ? sortResult : -sortResult;
+        })
+      };
     });
 };
 
@@ -55,7 +69,7 @@ exports.selectUserByUsername = username => {
         .where('author', user.username)
         .then(data => {
           user.article_votes = data[0].article_votes;
-          user.total_votes = parseInt(user.comment_votes) + parseInt(user.article_votes);
+          user.total_votes = `${parseInt(user.comment_votes) + parseInt(user.article_votes)}`;
           return { user };
         });
     });
