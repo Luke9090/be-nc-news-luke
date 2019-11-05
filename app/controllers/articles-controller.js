@@ -56,10 +56,10 @@ exports.deleteArticleById = (req, res, next) => {
     .catch(next);
 };
 
-exports.postArticle = (req,res,next) => {
-  insertArticle(req.params.article_id, req.body)
+exports.postArticle = (req, res, next) => {
+  insertArticle(req.body)
     .then(article => {
       res.status(201).send(article);
     })
     .catch(next);
-}
+};

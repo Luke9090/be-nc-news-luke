@@ -1,5 +1,6 @@
 const knex = require('../../connection');
 const utils = require('../utils/app-utils');
+const { validateTopic } = require('./topics-model');
 
 const selectArticlesById = articleId => {
   return utils
@@ -182,33 +183,31 @@ exports.delArticleById = articleId => {
     });
 };
 
-exports.insertArticle = (articleId, articleInput) => {
-  
-}
+exports.insertArticle = async article => {
+  if (
+    Object.keys(article)
+      .sort()
+      .join(',') !== 'body,title,topic,username'
+  )
+    return Promise.reject({
+      status: 400,
+      msg: 'Missing or superfluous keys. The JSON object you send must have keys for body, title, topic, username and no others'
+    });
+  if (typeof article.username !== 'string' || article.username.length === 0)
+    return Promise.reject({ status: 400, msg: 'Invalid username. Username must be a string.' });
+  if (typeof article.body !== 'string' || article.body.length === 0)
+    return Promise.reject({ status: 400, msg: 'Invalid article body. Article body must be a string of non-zero length.' });
+  if (typeof article.topic !== 'string' || article.topic.length === 0)
+    return Promise.reject({ status: 400, msg: 'Invalid article topic. Article topic must be a string of non-zero length.' });
+  if (typeof article.title !== 'string' || article.title.length === 0)
+    return Promise.reject({ status: 400, msg: 'Invalid article title. Article title must be a string of non-zero length.' });
+  const topicValidity = await validateTopic(article.topic);
+  if (!topicValidity) return Promise.reject({ status: 404, msg: `Topic "${article.topic}" does not exist.` });
 
-// exports.insertCommentOnArticle = (articleId, comment) => {
-//   return selectArticlesById(articleId)
-//     .then(() => {
-//       if (
-//         Object.keys(comment)
-//           .sort()
-//           .join(',') !== 'body,username'
-//       )
-//         return Promise.reject({
-//           status: 400,
-//           msg: 'Missing or superfluous keys. The JSON object you send must have keys for body, username and no others'
-//         });
-//       if (typeof comment.username !== 'string' || comment.username.length === 0)
-//         return Promise.reject({ status: 400, msg: 'Invalid username. Username must be a string.' });
-//       if (typeof comment.body !== 'string' || comment.body.length === 0)
-//         return Promise.reject({ status: 400, msg: 'Invalid comment body. Comment body must be a string of non-zero length.' });
-
-//       comment.article_id = articleId;
-//       return knex('comments')
-//         .insert(utils.renameKeys(comment, ['username', 'author']))
-//         .returning('*');
-//     })
-//     .then(([comment]) => {
-//       return { comment };
-//     });
-// };
+  return knex('articles')
+    .insert(utils.renameKeys(article, ['username', 'author']))
+    .returning('*')
+    .then(([article]) => {
+      return { article };
+    });
+};
