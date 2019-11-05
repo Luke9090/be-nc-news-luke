@@ -202,7 +202,7 @@ exports.insertArticle = async article => {
   if (typeof article.title !== 'string' || article.title.length === 0)
     return Promise.reject({ status: 400, msg: 'Invalid article title. Article title must be a string of non-zero length.' });
   const topicValidity = await validateTopic(article.topic);
-  if (!topicValidity) return Promise.reject({ status: 404, msg: `Topic "${article.topic}" does not exist.` });
+  if (!topicValidity.exists) return Promise.reject({ status: 404, msg: `Topic "${article.topic}" does not exist.` });
 
   return knex('articles')
     .insert(utils.renameKeys(article, ['username', 'author']))
