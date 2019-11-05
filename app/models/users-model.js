@@ -22,6 +22,7 @@ exports.selectUsers = () => {
       users.forEach(user => {
         user.comment_votes = commentVotes.find(voteObj => voteObj.author === user.username).comment_votes;
         user.article_votes = articleVotes.find(voteObj => voteObj.author === user.username).article_votes;
+        user.total_votes = parseInt(user.comment_votes) + parseInt(user.article_votes);
       });
       return { users };
     });
@@ -54,6 +55,7 @@ exports.selectUserByUsername = username => {
         .where('author', user.username)
         .then(data => {
           user.article_votes = data[0].article_votes;
+          user.total_votes = parseInt(user.comment_votes) + parseInt(user.article_votes);
           return { user };
         });
     });
