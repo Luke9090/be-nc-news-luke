@@ -4,6 +4,7 @@ exports.selectUsers = () => {
   return knex('users')
     .select('username', 'avatar_url', 'name')
     .countDistinct({ comment_count: 'comment_id', article_count: 'title' })
+    .sum({ comment_votes: 'comments.votes', article_votes: 'articles.votes' })
     .leftJoin('articles', 'articles.author', 'username')
     .leftJoin('comments', 'comments.author', 'username')
     .groupBy('username')
@@ -16,6 +17,7 @@ exports.selectUserByUsername = username => {
   return knex('users')
     .select('username', 'avatar_url', 'name')
     .countDistinct({ comment_count: 'comment_id', article_count: 'title' })
+    .sum({ comment_votes: 'comments.votes', article_votes: 'articles.votes' })
     .leftJoin('articles', 'articles.author', 'username')
     .leftJoin('comments', 'comments.author', 'username')
     .groupBy('username')
@@ -42,6 +44,6 @@ exports.selectUserValidity = username => {
     .select('username')
     .where('username', username)
     .then(users => {
-      return {exists: users.length===1};
+      return { exists: users.length === 1 };
     });
-}
+};
