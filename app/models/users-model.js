@@ -4,7 +4,6 @@ exports.selectUsers = () => {
   return knex('users')
     .select('username', 'avatar_url', 'name')
     .countDistinct({ comment_count: 'comment_id', article_count: 'title' })
-    .sum({ comment_votes: 'comments.votes', article_votes: 'articles.votes' })
     .leftJoin('articles', 'articles.author', 'username')
     .leftJoin('comments', 'comments.author', 'username')
     .groupBy('username')
@@ -17,14 +16,31 @@ exports.selectUserByUsername = username => {
   return knex('users')
     .select('username', 'avatar_url', 'name')
     .countDistinct({ comment_count: 'comment_id', article_count: 'title' })
-    .sum({ comment_votes: 'comments.votes', article_votes: 'articles.votes' })
     .leftJoin('articles', 'articles.author', 'username')
     .leftJoin('comments', 'comments.author', 'username')
     .groupBy('username')
     .where('username', username)
     .then(userArr => {
       if (userArr.length === 0) return Promise.reject({ status: 404, msg: `Could not find a user with the username '${username}'` });
-      else return { user: userArr[0] };
+      else {
+        const user = userArr[0];
+        return knex('comments')
+          .sum({ comment_votes: 'votes' })
+          .where('author', user.username)
+          .then(data => {
+            user.comment_votes = data[0].comment_votes;
+            return user;
+          });
+      }
+    })
+    .then(user => {
+      return knex('articles')
+        .sum({ article_votes: 'votes' })
+        .where('author', user.username)
+        .then(data => {
+          user.article_votes = data[0].article_votes;
+          return user;
+        });
     });
 };
 
