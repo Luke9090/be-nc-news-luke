@@ -11,15 +11,18 @@
   },
   "GET /api/users": {
     "description": "serves an array of user objects",
-    "queries": [],
+    "queries": ["sort_by", "order"],
     "exampleResponse": {
       "users": [
         {
           "username": "tickle122",
           "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
           "name": "Tom Tickle",
-          "article_count": 10,
-          "comment_count": 40
+          "article_count": "10",
+          "article_votes": "10",
+          "comment_count": "40",
+          "comment_votes": "3",
+          "total_votes": "3"
         }
       ]
     }
@@ -32,8 +35,11 @@
         "username": "tickle122",
         "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
         "name": "Tom Tickle",
-        "article_count": 10,
-        "comment_count": 40
+        "article_count": "10",
+        "article_votes": "10",
+        "comment_count": "40",
+        "comment_votes": "3",
+        "total_votes": "3"
       }
     }
   },
@@ -43,10 +49,10 @@
     "exampleResponse": {
       "comments": [
         {
-          "comment_id": 15,
+          "comment_id": "15",
           "author": "jessjelly",
-          "article_id": 13,
-          "votes": 12,
+          "article_id": "13",
+          "votes": "12",
           "created_at": "2016-05-16T20:21:19.007Z",
           "body": "Voluptas enim dolores minima repellendus corporis mollitia omnis. Consectetur vitae quaerat possimus repellendus. Cumque maxime nisi itaque aliquid vel non non.",
           "title": "What does Jose Mourinho's handwriting say about his personality?"
@@ -55,15 +61,58 @@
       ]
     }
   },
+  "GET /api/articles": {
+    "description": "serves an array of articles",
+    "queries": ["sort_by", "order", "author", "topic", "limit", "page"],
+    "exampleQuery": "/api/articles?author=jessjelly&topic=cooking",
+    "exampleResponse": {
+      "article_count": 1,
+      "articles": [
+        {
+          "author": "jessjelly",
+          "title": "Twice-Baked Butternut Squash Is the Thanksgiving Side Dish of Your Dreams",
+          "article_id": "30",
+          "topic": "cooking",
+          "created_at": "2018-05-06T02:40:35.489Z",
+          "votes": "0",
+          "comment_count": "8"
+        }
+      ]
+    }
+  },
+  "POST /api/articles": {
+    "description": "posts an",
+    "queries": [],
+    "receives": {
+      "username": "tickle122",
+      "body": "Text of article",
+      "title": "Article title",
+      "topic": "cooking"
+    },
+    "exampleResponse": {
+      "article": [
+        {
+          "author": "jessjelly",
+          "body": "Text of article",
+          "title": "Article title",
+          "topic": "cooking",
+          "article_id": "38",
+          "created_at": "2018-05-06T02:40:35.489Z",
+          "votes": "0",
+          "comment_count": "0"
+        }
+      ]
+    }
+  },
   "GET /api/articles/:article_id": {
     "description": "serves an article object",
     "queries": [],
     "exampleResponse": {
       "article": {
-        "article_id": 2,
+        "article_id": "2",
         "title": "The Rise Of Thinking Machines: How IBM's Watson Takes On The World",
         "body": "Text of article",
-        "votes": 0,
+        "votes": "0",
         "topic": "coding",
         "author": "jessjelly",
         "created_at": "2017-07-20T20:57:53.256Z",
@@ -74,7 +123,7 @@
   "DELETE /api/articles/:article_id": {
     "description": "deletes an article object",
     "queries": [],
-    "exampleResponse": 204
+    "exampleResponse": "204"
   },
   "PATCH /api/articles/:article_id": {
     "description": "updates the vote count of the article according to inc_votes property of passed JSON",
@@ -82,7 +131,7 @@
     "receives": { "inc_votes": 3 },
     "exampleResponse": {
       "article": {
-        "article_id": 2,
+        "article_id": "2",
         "title": "The Rise Of Thinking Machines: How IBM's Watson Takes On The World",
         "body": "Text of article",
         "votes": 3,
@@ -101,10 +150,10 @@
     },
     "exampleResponse": {
       "comment": {
-        "comment_id": 301,
+        "comment_id": "301",
         "author": "tickle122",
-        "article_id": 2,
-        "votes": 0,
+        "article_id": "2",
+        "votes": "0",
         "created_at": "2019-10-10T08:58:44.144Z",
         "body": "Text of comment"
       }
@@ -115,33 +164,14 @@
     "queries": ["sort_by", "order", "limit", "page"],
     "exampleResponse": {
       "article_id": "2",
-      "comment_count": 7,
+      "comment_count": "7",
       "comments": [
         {
-          "comment_id": 301,
-          "votes": 0,
+          "comment_id": "301",
+          "votes": "0",
           "created_at": "2019-10-10T08:58:44.144Z",
           "author": "tickle122",
           "body": "Text of comment"
-        }
-      ]
-    }
-  },
-  "GET /api/articles": {
-    "description": "serves an array of articles",
-    "queries": ["sort_by", "order", "author", "topic", "limit", "page"],
-    "exampleQuery": "/api/articles?author=jessjelly&topic=cooking",
-    "exampleResponse": {
-      "article_count": 1,
-      "articles": [
-        {
-          "author": "jessjelly",
-          "title": "Twice-Baked Butternut Squash Is the Thanksgiving Side Dish of Your Dreams",
-          "article_id": 30,
-          "topic": "cooking",
-          "created_at": "2018-05-06T02:40:35.489Z",
-          "votes": 0,
-          "comment_count": "8"
         }
       ]
     }
@@ -154,10 +184,10 @@
     },
     "exampleResponse": {
       "comment": {
-        "comment_id": 2,
+        "comment_id": "2",
         "author": "grumpy19",
-        "article_id": 4,
-        "votes": 13,
+        "article_id": "4",
+        "votes": "13",
         "created_at": "2016-11-10T21:26:49.256Z",
         "body": "Nobis consequatur animi. Ullam nobis quaerat voluptates veniam."
       }
