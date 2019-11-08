@@ -82,7 +82,7 @@ describe('/', () => {
             expect(body).to.have.key('users');
             expect(body.users).to.be.an('array');
             body.users.forEach(user => {
-              expect(user).to.have.keys('username', 'avatar_url', 'name');
+              expect(user).to.contain.keys('username', 'avatar_url', 'name', 'article_count', 'article_votes', 'comment_count', 'comment_votes', 'total_votes');
             });
           });
       });
@@ -92,20 +92,22 @@ describe('/', () => {
           .expect(200)
           .then(({ body }) => {
             expect(body).to.have.key('user');
-            expect(body.user).to.have.keys('username', 'avatar_url', 'name');
-            const expected = { username: 'rogersop', avatar_url: 'https://avatars2.githubusercontent.com/u/24394918?s=400&v=4', name: 'paul' };
+            expect(body.user).to.contain.keys('username', 'avatar_url', 'name');
+            const expected = { "article_count": "3", "article_votes": "0", "avatar_url": "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4", "comment_count": "0", "comment_votes": "0", "name": "paul", "total_votes": "0", "username": "rogersop" };
             expect(body.user).to.eql(expected);
           });
       });
-      it('GET /:non-existent-username - responds 404 with an object containing an error message under the key "err"', () => {
-        return request(app)
-          .get('/api/users/non-existent-user')
-          .expect(404)
-          .then(({ body }) => {
-            expect(body).to.have.key('err');
-            expect(body.err).to.eql("Could not find a user with the username 'non-existent-user'");
-          });
-      });
+      describe('/users error states', () => {
+        it('GET /:non-existent-username - responds 404 with an object containing an error message under the key "err"', () => {
+          return request(app)
+            .get('/api/users/non-existent-user')
+            .expect(404)
+            .then(({ body }) => {
+              expect(body).to.have.key('err');
+              expect(body.err).to.eql("Could not find a user with the username 'non-existent-user'");
+            });
+        });
+      })
     });
     describe('/articles', () => {
       it('GET / - responds 200 with an array of article objects under the key articles', () => {
@@ -577,9 +579,6 @@ describe('/', () => {
               .get('/api/articles/1/comments?sort_by=body')
               .expect(200)
               .then(({ body: { comments } }) => {
-                // Alex troubleshooting
-                // console.log(comments);
-                // expect(comments).to.be.descendingBy('body');
                 for (let i = 1; i < comments.length; i++) {
                   const body1 = comments[i - 1].body.toLowerCase();
                   const body2 = comments[i].body.toLowerCase();
