@@ -2,7 +2,6 @@ const knex = require('../../connection');
 const utils = require('../utils/app-utils');
 
 exports.selectUsers = query => {
-  console.log(query);
   return utils
     .checkQueryKeys(query, { sort_by: ['username', 'comment_count', 'article_count', 'comment_votes', 'article_votes', 'total_votes'], order: ['asc', 'desc'] })
     .then(() => {
@@ -26,8 +25,10 @@ exports.selectUsers = query => {
     })
     .then(([users, commentVotes, articleVotes]) => {
       users.forEach(user => {
-        user.comment_votes = commentVotes.find(voteObj => voteObj.author === user.username).comment_votes;
-        user.article_votes = articleVotes.find(voteObj => voteObj.author === user.username).article_votes;
+        const userCommentVote = commentVotes.find(voteObj => voteObj.author === user.username)
+        user.comment_votes = userCommentVote ? userCommentVote.comment_votes : '0';
+        const userArticleVote = articleVotes.find(voteObj => voteObj.author === user.username)
+        user.article_votes = userArticleVote ? userArticleVote.article_votes : '0';
         user.total_votes = `${parseInt(user.comment_votes) + parseInt(user.article_votes)}`;
       });
       return {
@@ -58,7 +59,7 @@ exports.selectUserByUsername = username => {
           .sum({ comment_votes: 'votes' })
           .where('author', user.username)
           .then(data => {
-            user.comment_votes = data[0].comment_votes;
+            user.comment_votes = data[0].comment_votes || '0';
             return user;
           });
       }
@@ -68,7 +69,7 @@ exports.selectUserByUsername = username => {
         .sum({ article_votes: 'votes' })
         .where('author', user.username)
         .then(data => {
-          user.article_votes = data[0].article_votes;
+          user.article_votes = data[0].article_votes || '0';
           user.total_votes = `${parseInt(user.comment_votes) + parseInt(user.article_votes)}`;
           return { user };
         });
