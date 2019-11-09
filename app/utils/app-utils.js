@@ -41,11 +41,16 @@ utils.isPositiveNum = val => {
   return !isNaN(val) && Number(val) > 0;
 };
 
+utils.isString = val => {
+  return typeof val === 'string' && val.length > 0;
+}
+
 utils.checkProperties = (obj, validation, objType='query') => {
+  const requirement = objType==='JSON' ? 'must include only' : 'can only include';
   const validKeys = Object.keys(validation);
   const objKeys = Object.keys(obj);
-  const validity = objKeys.every(key => validKeys.includes(key));
-  if (!validity) return Promise.reject({ status: 400, msg: `Bad request. ${objType[0].toUpperCase()+objType.slice(1)} can only include the following keys: ${validKeys.join(', ')}` });
+  const validity = objType==='JSON' ? validKeys.every(key => objKeys.includes(key)) && objKeys.every(key => validKeys.includes(key)) : objKeys.every(key => validKeys.includes(key));
+  if (!validity) return Promise.reject({ status: 400, msg: `Bad request. ${objType[0].toUpperCase()+objType.slice(1)} ${requirement} the following keys: ${validKeys.join(', ')}` });
   for (let i=0; i<objKeys.length; i++) {
     const currKey = objKeys[i];
     const currValidation = validation[currKey];

@@ -442,7 +442,7 @@ describe('/', () => {
               .send({ inc_vote: 3 })
               .expect(400)
               .then(({ body }) => {
-                expect(body.err).to.equal(`Bad request. JSON can only include the following keys: inc_votes`);
+                expect(body.err).to.equal(`Bad request. JSON must include only the following keys: inc_votes`);
               });
           });
           it('PATCH / - responds 400 with error message if sent invalid inc_votes value in JSON', () => {
@@ -707,28 +707,28 @@ describe('/', () => {
                   .send({ body: 'FIRST, loooool' })
                   .expect(400)
                   .then(({ body }) => {
-                    expect(body.err).to.equal('Missing or superfluous keys. The JSON object you send must have keys for body, username and no others');
+                    expect(body.err).to.equal('Bad request. JSON must include only the following keys: body, username');
                   });
                 const noBody = request(app)
                   .post('/api/articles/2/comments')
                   .send({ username: 'rogers' })
                   .expect(400)
                   .then(({ body }) => {
-                    expect(body.err).to.equal('Missing or superfluous keys. The JSON object you send must have keys for body, username and no others');
+                    expect(body.err).to.equal('Bad request. JSON must include only the following keys: body, username');
                   });
                 const extraKeys = request(app)
                   .post('/api/articles/2/comments')
                   .send({ username: 'rogers', body: 'FIRST, loooool', extra: 5 })
                   .expect(400)
                   .then(({ body }) => {
-                    expect(body.err).to.equal('Missing or superfluous keys. The JSON object you send must have keys for body, username and no others');
+                    expect(body.err).to.equal('Bad request. JSON must include only the following keys: body, username');
                   });
                 const multipleErrs = request(app)
                   .post('/api/articles/2/comments')
                   .send({ extra: 5 })
                   .expect(400)
                   .then(({ body }) => {
-                    expect(body.err).to.equal('Missing or superfluous keys. The JSON object you send must have keys for body, username and no others');
+                    expect(body.err).to.equal('Bad request. JSON must include only the following keys: body, username');
                   });
                 return Promise.all([noUsername, noBody, extraKeys, multipleErrs]);
               });
@@ -953,7 +953,7 @@ describe('/', () => {
               .send({ inc_vote: 3 })
               .expect(400)
               .then(({ body }) => {
-                expect(body.err).to.equal(`Bad request. JSON can only include the following keys: inc_votes`);
+                expect(body.err).to.equal(`Bad request. JSON must include only the following keys: inc_votes`);
               });
           });
           it('PATCH / - responds 400 with error message if sent invalid inc_votes value in JSON', () => {
