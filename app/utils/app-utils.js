@@ -16,23 +16,6 @@ utils.checkId = (id, type) => {
   else return Promise.resolve();
 };
 
-utils.checkQueryKeys = (query, validation) => {
-  // Accepts a query and a validation object with accepted query keys whose values are an array of acceptable values (or a blank array if not testing values), or a predicate function to test the query value with
-  const validKeys = Object.keys(validation);
-  const validity = Object.keys(query).every(key => validKeys.includes(key));
-  if (!validity) return Promise.reject({ status: 400, msg: `Bad request. Query can only include the following keys: ${validKeys.join(', ')}` });
-  for (let i = 0; i < validKeys.length; i++) {
-    const key = validKeys[i];
-    if (query[key] && Array.isArray(validation[key]) && validation[key].length) {
-      if (!validation[key].includes(query[key]))
-        return Promise.reject({ status: 400, msg: `Bad request - ${key} must be one of: '${validation[key].join("', '")}'` });
-    } else if (query[key] && typeof validation[key] === 'function') {
-      if (!validation[key](query[key])) return Promise.reject({ status: 400, msg: `Bad request. Unexpected value for ${key} in query.` });
-    }
-  }
-  return Promise.resolve();
-};
-
 utils.paginate = (obj, name, limit, page = 1) => {
   const newObj = { ...obj };
 
@@ -51,17 +34,27 @@ utils.paginate = (obj, name, limit, page = 1) => {
 };
 
 utils.isNum = val => {
+  return !isNaN(val);
+};
+
+utils.isPositiveNum = val => {
   return !isNaN(val) && Number(val) > 0;
 };
 
-utils.checkJsonKeys = (query, validKeys) => {
-  const validity = Object.keys(query).every(key => validKeys.includes(key));
-  if (validity) return Promise.resolve();
-  else return Promise.reject({ status: 400, msg: `Bad request. JSON passed in request can only include the following keys: ${validKeys.join(', ')}` });
-};
-
-utils.checkIncVotes = inc_votes => {
-  if (isNaN(inc_votes)) return Promise.reject({ status: 400, msg: `Bad request. The value of inc_votes must be a number.` });
+utils.checkProperties = (obj, validation, objType='query') => {
+  const validKeys = Object.keys(validation);
+  const objKeys = Object.keys(obj);
+  const validity = objKeys.every(key => validKeys.includes(key));
+  if (!validity) return Promise.reject({ status: 400, msg: `Bad request. ${objType[0].toUpperCase()+objType.slice(1)} can only include the following keys: ${validKeys.join(', ')}` });
+  for (let i=0; i<objKeys.length; i++) {
+    const currKey = objKeys[i];
+    const currValidation = validation[currKey];
+    if (Array.isArray(currValidation) && currValidation.length) {
+      if (!currValidation.includes(obj[currKey])) return Promise.reject({ status: 400, msg: `Bad request - ${currKey} in ${objType} must be one of: '${currValidation.join("', '")}'` });
+    } else if (typeof currValidation === 'function') {
+      if (!currValidation(obj[currKey])) return Promise.reject({ status: 400, msg: `Bad request. Unexpected value for ${currKey} in ${objType}.` });
+    }
+  }
   return Promise.resolve();
 };
 

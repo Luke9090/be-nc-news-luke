@@ -3,7 +3,7 @@ const utils = require('../utils/app-utils');
 
 exports.selectUsers = query => {
   return utils
-    .checkQueryKeys(query, { sort_by: ['username', 'comment_count', 'article_count', 'comment_votes', 'article_votes', 'total_votes'], order: ['asc', 'desc'] })
+    .checkProperties(query, { sort_by: ['username', 'comment_count', 'article_count', 'comment_votes', 'article_votes', 'total_votes'], order: ['asc', 'desc'] })
     .then(() => {
       return knex('users')
         .select('username', 'avatar_url', 'name')

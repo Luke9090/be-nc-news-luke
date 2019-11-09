@@ -14,10 +14,7 @@ const selectCommentById = commentId => {
 
 exports.updateCommentVotes = (commentId, patchObj) => {
   return utils
-    .checkJsonKeys(patchObj, ['inc_votes'])
-    .then(() => {
-      return utils.checkIncVotes(patchObj.inc_votes);
-    })
+    .checkProperties(patchObj, {inc_votes: utils.isNum}, 'JSON')
     .then(() => {
       return selectCommentById(commentId);
     })

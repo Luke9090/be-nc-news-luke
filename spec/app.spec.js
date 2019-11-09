@@ -86,6 +86,7 @@ describe('/', () => {
             });
           });
       });
+      // sort_by and order
       it('GET /:username - responds 200 with an object containing a user object under the key "user"', () => {
         return request(app)
           .get('/api/users/rogersop')
@@ -107,6 +108,7 @@ describe('/', () => {
               expect(body.err).to.eql("Could not find a user with the username 'non-existent-user'");
             });
         });
+        // variety of invalid queries
       })
     });
     describe('/articles', () => {
@@ -346,7 +348,7 @@ describe('/', () => {
             .get('/api/articles?order=badOrder')
             .expect(400)
             .then(({ body }) => {
-              expect(body.err).to.equal("Bad request - order must be one of: 'asc', 'desc'");
+              expect(body.err).to.equal("Bad request - order in query must be one of: 'asc', 'desc'");
             });
         });
         it('GET ?filter=non-existent-value - responds with 404 and an error message', () => {
@@ -440,7 +442,7 @@ describe('/', () => {
               .send({ inc_vote: 3 })
               .expect(400)
               .then(({ body }) => {
-                expect(body.err).to.equal(`Bad request. JSON passed in request can only include the following keys: inc_votes`);
+                expect(body.err).to.equal(`Bad request. JSON can only include the following keys: inc_votes`);
               });
           });
           it('PATCH / - responds 400 with error message if sent invalid inc_votes value in JSON', () => {
@@ -449,7 +451,7 @@ describe('/', () => {
               .send({ inc_votes: 'banana' })
               .expect(400)
               .then(({ body }) => {
-                expect(body.err).to.equal('Bad request. The value of inc_votes must be a number.');
+                expect(body.err).to.equal('Bad request. Unexpected value for inc_votes in JSON.');
               });
           });
           it('GET, PATCH or DELETE - /:invalid_article_id - responds 400 with an object containing an error message under the key "err"', () => {
@@ -763,7 +765,7 @@ describe('/', () => {
                   .get('/api/articles/1/comments?order=badOrder')
                   .expect(400)
                   .then(({ body }) => {
-                    expect(body.err).to.equal("Bad request - order must be one of: 'asc', 'desc'");
+                    expect(body.err).to.equal("Bad request - order in query must be one of: 'asc', 'desc'");
                   });
               });
               it('GET /?badKey=anything - responds 400 with error message', () => {
@@ -951,7 +953,7 @@ describe('/', () => {
               .send({ inc_vote: 3 })
               .expect(400)
               .then(({ body }) => {
-                expect(body.err).to.equal(`Bad request. JSON passed in request can only include the following keys: inc_votes`);
+                expect(body.err).to.equal(`Bad request. JSON can only include the following keys: inc_votes`);
               });
           });
           it('PATCH / - responds 400 with error message if sent invalid inc_votes value in JSON', () => {
@@ -960,7 +962,7 @@ describe('/', () => {
               .send({ inc_votes: 'banana' })
               .expect(400)
               .then(({ body }) => {
-                expect(body.err).to.equal('Bad request. The value of inc_votes must be a number.');
+                expect(body.err).to.equal('Bad request. Unexpected value for inc_votes in JSON.');
               });
           });
         });

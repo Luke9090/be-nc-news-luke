@@ -22,10 +22,7 @@ exports.selectArticlesById = selectArticlesById;
 
 exports.updateArticlesById = (articleId, body) => {
   return utils
-    .checkJsonKeys(body, ['inc_votes'])
-    .then(() => {
-      return utils.checkIncVotes(body.inc_votes);
-    })
+    .checkProperties(body, {'inc_votes': utils.isNum}, 'JSON')
     .then(() => {
       return utils.checkId(articleId, 'article');
     })
@@ -73,7 +70,7 @@ exports.selectCommentsByArticle = (articleId, query) => {
   let { sort_by = 'created_at', order = 'desc', author, topic, limit, page } = newQuery;
   if (!limit && page) return Promise.reject({ status: 400, msg: `Bad request. Can't give paginated response if no limit is defined in query` });
   return utils
-    .checkQueryKeys(newQuery, { sort_by: [], order: ['asc', 'desc'], author: [], limit: utils.isNum, page: utils.isNum })
+    .checkProperties(newQuery, { sort_by: [], order: ['asc', 'desc'], author: [], limit: utils.isPositiveNum, page: utils.isPositiveNum })
     .then(() => {
       return selectArticlesById(articleId);
     })
@@ -99,7 +96,7 @@ exports.selectArticles = query => {
   sort_by = sort_by === 'comment_count' ? sort_by : 'articles.' + sort_by;
   if (!limit && page) return Promise.reject({ status: 400, msg: `Bad request. Can't give paginated response if no limit is defined in query` });
   return utils
-    .checkQueryKeys(newQuery, { sort_by: [], order: ['asc', 'desc'], author: [], topic: [], limit: utils.isNum, page: utils.isNum })
+    .checkProperties(newQuery, { sort_by: [], order: ['asc', 'desc'], author: [], topic: [], limit: utils.isPositiveNum, page: utils.isPositiveNum })
     .then(() => {
       return checkFilterExistence(author, topic);
     })
